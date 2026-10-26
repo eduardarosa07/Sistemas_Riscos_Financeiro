@@ -1,0 +1,89 @@
+<a routerLink="/clientes" class="back-link">← Voltar para Clientes</a>
+@if (erro) { <div class="alert alert-error">{{ erro }}</div> }
+@if (carregando) { <div class="loading-card">Carregando visão consolidada...</div> }
+@if (dados; as d) {
+  <div class="page-head client-title">
+    <div><div class="eyebrow">CLIENTE</div><h1>{{ d.cliente.nomeRazaoSocial }}</h1><p>{{ d.cliente.idCliente }} · {{ d.cliente.documentoFicticio }}</p></div>
+    <span class="status-pill">{{ d.cliente.statusCliente }}</span>
+  </div>
+
+  <section class="client-summary">
+    <div><span>Tipo</span><strong>{{ d.cliente.tipoPessoa }}</strong></div>
+    <div><span>Cidade</span><strong>{{ d.cliente.cidade }}/{{ d.cliente.uf }}</strong></div>
+    <div><span>Segmento</span><strong>{{ d.cliente.segmento }}</strong></div>
+    <div><span>Risco geral</span><strong>{{ d.riscoCliente?.nivelRisco || '—' }}</strong></div>
+    <div><span>Score geral</span><strong>{{ d.riscoCliente?.scoreRiscoGeral ?? '—' }}</strong></div>
+  </section>
+
+  <!-- Contadores segmentados: KYC é avaliação cadastral, não ocorrência de risco. -->
+  <section class="kpi-grid safe-summary" aria-label="Contadores de ocorrências do cliente">
+    <div class="kpi-card"><div><span>Alertas PLD</span><strong>{{d.alertasPld.length}}</strong><small>Vinculados ao cliente</small></div></div>
+    <div class="kpi-card"><div><span>Alertas de fraude</span><strong>{{d.alertasFraude.length}}</strong><small>Vinculados ao cliente</small></div></div>
+    <div class="kpi-card"><div><span>Chargebacks</span><strong>{{d.chargebacks.length}}</strong><small>Contestações vinculadas</small></div></div>
+    <div class="kpi-card"><div><span>Avaliações KYC</span><strong>{{d.kycs.length}}</strong><small>Cadastro — não integra ocorrências</small></div></div>
+  </section>
+
+  <div class="tabs">
+    @for (t of [
+      ['resumo','Resumo'],['transacoes','Transações'],['kyc','KYC'],['pld','PLD'],['fraude','Fraude'],['chargeback','Chargeback']
+    ]; track t[0]) {
+      <button [class.active]="aba === t[0]" (click)="aba = t[0]">{{ t[1] }}</button>
+    }
+  </div>
+
+  @if (aba === 'resumo') {
+    <div class="detail-grid">
+      <div class="panel">
+        <h3>Dados cadastrais</h3>
+        <dl class="data-list">
+          <div><dt>Nome / Razão social</dt><dd>{{ d.cliente.nomeRazaoSocial }}</dd></div>
+          <div><dt>Documento</dt><dd>{{ d.cliente.documentoFicticio }}</dd></div>
+          <div><dt>Origem do cadastro</dt><dd>{{ d.cliente.origemCadastro }}</dd></div>
+          <div><dt>Profissão / Atividade</dt><dd>{{ d.cliente.profissaoAtividade }}</dd></div>
+          <div><dt>Renda / Faturamento mensal</dt><dd>{{ d.cliente.rendaFaturamentoMensal | currency:'BRL' }}</dd></div>
+        </dl>
+      </div>
+      <div class="panel">
+        <h3>Indicadores de risco</h3>
+        <dl class="data-list">
+          <div><dt>Score KYC</dt><dd>{{ d.riscoCliente?.scoreKyc ?? '—' }}</dd></div>
+          <div><dt>Score PLD</dt><dd>{{ d.riscoCliente?.scorePld ?? '—' }}</dd></div>
+          <div><dt>Score Fraude</dt><dd>{{ d.riscoCliente?.scoreFraude ?? '—' }}</dd></div>
+          <div><dt>Score Chargeback</dt><dd>{{ d.riscoCliente?.scoreChargeback ?? '—' }}</dd></div>
+          <div><dt>Valor de perdas</dt><dd>{{ d.riscoCliente?.valorPerdas | currency:'BRL' }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  }
+
+  @if (aba === 'transacoes') {
+    <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Valor</th><th>Canal</th><th>Status</th></tr></thead><tbody>
+      @for (x of d.transacoes; track x.idTransacao) {<tr><td>{{x.idTransacao}}</td><td>{{x.dataHoraTransacao | date:'dd/MM/yyyy HH:mm'}}</td><td>{{x.tipoTransacao}}</td><td>{{x.valor | currency:'BRL'}}</td><td>{{x.canal}}</td><td>{{x.statusTransacao}}</td></tr>}
+      @empty {<tr><td colspan="6" class="empty">Sem transações relacionadas.</td></tr>}
+    </tbody></table></div></div>
+  }
+  @if (aba === 'kyc') {
+    <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Score</th><th>Risco</th><th>Status</th><th>Decisão</th></tr></thead><tbody>
+      @for (x of d.kycs; track x.idKyc) {<tr><td>{{x.idKyc}}</td><td>{{x.dataAnalise | date:'dd/MM/yyyy'}}</td><td>{{x.scoreKyc}}</td><td>{{x.nivelRiscoKyc}}</td><td>{{x.statusKyc}}</td><td>{{x.motivoDecisao || '—'}}</td></tr>}
+      @empty {<tr><td colspan="6" class="empty">Sem análises KYC relacionadas.</td></tr>}
+    </tbody></table></div></div>
+  }
+  @if (aba === 'pld') {
+    <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Valor</th><th>Risco</th><th>Status</th></tr></thead><tbody>
+      @for (x of d.alertasPld; track x.idAlertaPld) {<tr><td>{{x.idAlertaPld}}</td><td>{{x.dataAlerta | date:'dd/MM/yyyy'}}</td><td>{{x.tipoAlerta}}</td><td>{{x.valorRelacionado | currency:'BRL'}}</td><td>{{x.severidade}}</td><td>{{x.statusAnalise}}</td></tr>}
+      @empty {<tr><td colspan="6" class="empty">Sem alertas PLD relacionados.</td></tr>}
+    </tbody></table></div></div>
+  }
+  @if (aba === 'fraude') {
+    <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Exposição</th><th>Risco</th><th>Status</th></tr></thead><tbody>
+      @for (x of d.alertasFraude; track x.idAlertaFraude) {<tr><td>{{x.idAlertaFraude}}</td><td>{{x.dataAlerta | date:'dd/MM/yyyy'}}</td><td>{{x.tipoFraude}}</td><td>{{x.valorExposto | currency:'BRL'}}</td><td>{{x.severidade}}</td><td>{{x.statusAnalise}}</td></tr>}
+      @empty {<tr><td colspan="6" class="empty">Sem alertas de fraude relacionados.</td></tr>}
+    </tbody></table></div></div>
+  }
+  @if (aba === 'chargeback') {
+    <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Contestação</th><th>Motivo</th><th>Valor</th><th>Status</th><th>Resultado</th></tr></thead><tbody>
+      @for (x of d.chargebacks; track x.idChargeback) {<tr><td>{{x.idChargeback}}</td><td>{{x.dataContestacao | date:'dd/MM/yyyy'}}</td><td>{{x.motivoChargeback}}</td><td>{{x.valorContestado | currency:'BRL'}}</td><td>{{x.statusChargeback}}</td><td>{{x.resultadoInvestigacao}}</td></tr>}
+      @empty {<tr><td colspan="6" class="empty">Sem chargebacks relacionados.</td></tr>}
+    </tbody></table></div></div>
+  }
+}

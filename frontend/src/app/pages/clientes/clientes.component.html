@@ -1,0 +1,44 @@
+<div class="page-head">
+  <div><div class="eyebrow">CADASTRO</div><h1>Clientes</h1><p>Consulte clientes e acesse o histórico de análises de risco</p></div>
+  <button class="btn" (click)="carregar()">Atualizar</button>
+</div>
+@if (erro) { <div class="alert alert-error">{{ erro }}</div> }
+
+<div class="filter-card filtro-clientes">
+  <label>Buscar cliente
+    <input [(ngModel)]="busca" placeholder="ID (ex.: CLI0001), nome ou documento">
+  </label>
+  <label>Tipo de pessoa
+    <select [(ngModel)]="tipo"><option value="TODOS">Todos</option><option value="PF">Pessoa Física</option><option value="PJ">Pessoa Jurídica</option></select>
+  </label>
+  <label>Situação
+    <select [(ngModel)]="situacao"><option value="TODAS">Todas</option><option value="ATIVO">Ativo</option><option value="INATIVO">Inativo</option></select>
+  </label>
+  <button class="btn ghost btn-limpar-clientes" (click)="limpar()">Limpar filtros</button>
+</div>
+
+<div class="panel table-panel">
+  <div class="panel-title"><h3>Clientes encontrados</h3><span class="count-pill">{{ filtrados.length }} cliente(s)</span></div>
+  @if (carregando) { <div class="loading-card">Carregando clientes...</div> }
+  @if (!carregando) {
+    <div class="table-wrap">
+      <table class="clickable-table">
+        <thead><tr><th>Código</th><th>Nome / Razão social</th><th>Documento</th><th>Tipo</th><th>Cidade</th><th>Situação</th></tr></thead>
+        <tbody>
+          @for (c of filtrados; track c.idCliente) {
+            <tr (click)="abrir(c)">
+              <td><strong>{{ c.idCliente }}</strong></td>
+              <td>{{ c.nomeRazaoSocial }}</td>
+              <td>{{ c.documentoFicticio }}</td>
+              <td>{{ c.tipoPessoa === 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física' }}</td>
+              <td>{{ c.cidade }}/{{ c.uf }}</td>
+              <td><span class="status-pill" [class.status-active]="c.statusCliente==='ATIVO'" [class.status-inactive]="c.statusCliente==='INATIVO'">{{ c.statusCliente }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="empty">Nenhum cliente encontrado.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

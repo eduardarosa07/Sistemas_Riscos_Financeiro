@@ -1,0 +1,483 @@
+
+<!-- CABEÇALHO DA PÁGINA -->
+
+<div class="page-head">
+  <div>
+    <div class="eyebrow">ADMINISTRAÇÃO</div>
+
+    <h1>Gestão de Usuários</h1>
+
+    <p>
+      Gerencie contas, perfis e permissões de acesso ao sistema.
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-primary"
+    (click)="novo()">
+    + Novo usuário
+  </button>
+</div>
+
+<!-- MENSAGENS DE ERRO -->
+
+@if (erro) {
+  <div class="alert alert-error" role="alert">
+    {{ erro }}
+  </div>
+}
+
+<!-- FILTROS -->
+
+<div class="filter-card">
+
+  <label>
+    Pesquisar usuário
+
+    <input
+      type="search"
+      [(ngModel)]="busca"
+      placeholder="Nome ou e-mail"
+      autocomplete="off">
+  </label>
+
+  <label>
+    Perfil
+
+    <select [(ngModel)]="perfil">
+      <option value="TODOS">Todos os perfis</option>
+
+      @for (p of perfis; track p) {
+        <option [value]="p">{{ p }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    Situação
+
+    <select [(ngModel)]="situacao">
+      <option value="TODAS">Todas as situações</option>
+      <option value="ATIVO">Ativo</option>
+      <option value="INATIVO">Inativo</option>
+    </select>
+  </label>
+
+</div>
+
+<!-- TABELA DE USUÁRIOS -->
+
+<div class="panel table-panel">
+
+  <div class="panel-title">
+    <h3>Usuários cadastrados</h3>
+
+    <span class="count-pill">
+      {{ filtrados.length }} usuário(s)
+    </span>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-card" role="status">
+      Carregando usuários...
+    </div>
+  }
+
+  @if (!carregando) {
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">E-mail</th>
+            <th scope="col">Perfil</th>
+            <th scope="col">Situação</th>
+            <th scope="col">Criação</th>
+            <th scope="col">Atualização</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (u of filtrados; track u.id) {
+
+            <tr>
+
+              <!-- NOME -->
+
+              <td>
+                <strong>{{ u.nome }}</strong>
+
+                @if (ehMinhaConta(u)) {
+                  <span
+                    class="self-account-label"
+                    aria-label="Esta é sua conta">
+                    (Você)
+                  </span>
+                }
+              </td>
+
+              <!-- E-MAIL -->
+
+              <td>
+                {{ u.email }}
+              </td>
+
+              <!-- PERFIL -->
+
+              <td>
+                {{ u.perfil }}
+              </td>
+
+              <!-- SITUAÇÃO -->
+
+              <td>
+                <span
+                  class="status-pill"
+                  [class.status-active]="u.status === 'ATIVO'"
+                  [class.status-inactive]="u.status === 'INATIVO'">
+
+                  {{ u.status === 'ATIVO' ? 'ATIVO' : 'INATIVO' }}
+
+                </span>
+              </td>
+
+              <!-- DATA DE CRIAÇÃO -->
+
+              <td>
+                {{
+                  u.createdAt
+                    ? (u.createdAt | date:'dd/MM/yyyy HH:mm')
+                    : '—'
+                }}
+              </td>
+
+              <!-- ÚLTIMA ATUALIZAÇÃO -->
+
+              <td>
+                {{
+                  u.updatedAt
+                    ? (u.updatedAt | date:'dd/MM/yyyy HH:mm')
+                    : '—'
+                }}
+              </td>
+
+              <!-- AÇÕES -->
+
+              <td>
+
+                <button
+                  type="button"
+                  class="link-btn"
+                  (click)="editar(u)">
+                  Editar
+                </button>
+
+                @if (!ehMinhaConta(u)) {
+
+                  <button
+                    type="button"
+                    class="link-btn"
+                    (click)="abrirSenha(u)">
+                    Redefinir senha
+                  </button>
+
+                  <button
+                    type="button"
+                    class="link-btn"
+                    [class.danger]="u.status === 'ATIVO'"
+                    (click)="alternar(u)">
+
+                    {{
+                      u.status === 'ATIVO'
+                        ? 'Inativar'
+                        : 'Ativar'
+                    }}
+
+                  </button>
+
+                }
+
+              </td>
+
+            </tr>
+
+          } @empty {
+
+            <tr>
+              <td colspan="7" class="empty">
+                Nenhum usuário encontrado.
+              </td>
+            </tr>
+
+          }
+
+        </tbody>
+      </table>
+
+    </div>
+  }
+
+</div>
+
+<!-- MODAL DE CADASTRO E EDIÇÃO -->
+
+@if (modal) {
+
+  <div class="modal-backdrop">
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-modal-usuario">
+
+      <div class="modal-head">
+
+        <h2 id="titulo-modal-usuario">
+          {{
+            editando
+              ? 'Editar usuário'
+              : 'Novo usuário'
+          }}
+        </h2>
+
+        <button
+          type="button"
+          (click)="modal = false"
+          aria-label="Fechar formulário">
+          ×
+        </button>
+
+      </div>
+
+      <!-- AVISO SOBRE A PRÓPRIA CONTA -->
+
+      @if (editandoMinhaConta) {
+
+        <div class="account-security-notice">
+
+          <strong>Proteção da conta administrativa</strong>
+
+          <p>
+            Você pode atualizar seu nome e e-mail,
+            mas não pode alterar seu próprio perfil
+            de acesso.
+          </p>
+
+        </div>
+
+      }
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="salvar()">
+
+        <!-- NOME -->
+
+        <label>
+          Nome completo
+
+          <input
+            type="text"
+            formControlName="nome"
+            autocomplete="name"
+            required>
+        </label>
+
+        <!-- E-MAIL -->
+
+        <label>
+          E-mail
+
+          <input
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            required>
+        </label>
+
+        <!-- SENHA PARA NOVO USUÁRIO -->
+
+        @if (!editando) {
+
+          <label>
+            Senha inicial
+
+            <input
+              type="password"
+              formControlName="senha"
+              autocomplete="new-password"
+              minlength="8"
+              placeholder="Mínimo de 8 caracteres"
+              required>
+          </label>
+
+        }
+
+        <!-- PERFIL -->
+
+        <label>
+          Perfil de acesso
+
+          <select
+            formControlName="perfil"
+            [attr.aria-disabled]="editandoMinhaConta">
+
+            @for (p of perfis; track p) {
+              <option [value]="p">
+                {{ p }}
+              </option>
+            }
+
+          </select>
+        </label>
+
+        @if (editandoMinhaConta) {
+
+          <p class="form-help-text">
+            Seu perfil está bloqueado para edição
+            por segurança.
+          </p>
+
+        }
+
+        <!-- MENSAGEM DE ERRO -->
+
+        @if (mensagem) {
+
+          <div class="alert alert-error" role="alert">
+            {{ mensagem }}
+          </div>
+
+        }
+
+        <!-- BOTÕES -->
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn"
+            [disabled]="salvando"
+            (click)="modal = false">
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="salvando">
+
+            {{
+              salvando
+                ? 'Salvando...'
+                : editando
+                  ? 'Salvar alterações'
+                  : 'Cadastrar usuário'
+            }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}
+
+<!-- MODAL DE REDEFINIÇÃO DE SENHA -->
+
+@if (senhaModal) {
+
+  <div class="modal-backdrop">
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-redefinir-senha">
+
+      <div class="modal-head">
+
+        <h2 id="titulo-redefinir-senha">
+          Redefinir senha
+        </h2>
+
+        <button
+          type="button"
+          (click)="senhaModal = false"
+          aria-label="Fechar">
+          ×
+        </button>
+
+      </div>
+
+      <p>
+        Usuário:
+        <strong>{{ usuarioSenha?.nome }}</strong>
+      </p>
+
+      <form (ngSubmit)="redefinirSenha()">
+
+        <label>
+          Nova senha
+
+          <input
+            type="password"
+            name="novaSenha"
+            [(ngModel)]="novaSenha"
+            autocomplete="new-password"
+            minlength="8"
+            required
+            placeholder="Mínimo de 8 caracteres">
+        </label>
+
+        @if (erroRedefinicao) {
+
+          <div class="alert alert-error" role="alert">
+            {{ erroRedefinicao }}
+          </div>
+
+        }
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn"
+            [disabled]="salvandoRedefinicao"
+            (click)="senhaModal = false">
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="salvandoRedefinicao">
+
+            {{
+              salvandoRedefinicao
+                ? 'Salvando...'
+                : 'Redefinir senha'
+            }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}

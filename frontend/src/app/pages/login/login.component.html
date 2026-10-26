@@ -1,0 +1,19 @@
+<div class="login-page">
+ <div class="login-layout">
+  <section class="login-form-area">
+   <div class="login-card"><div class="login-brand"><strong>SGR</strong><span>Sistema de Gerenciamento de Riscos</span></div>
+    <h2>Bem-vindo(a)!</h2><p>Faça seu login para acessar o sistema.</p>
+    <form [formGroup]="form" (ngSubmit)="entrar()">
+     <label for="login-email">Usuário / E-mail</label><div class="field-icon"><input id="login-email" type="email" autocomplete="username" formControlName="email" placeholder="Digite seu e-mail" [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"></div>
+     @if(form.controls.email.touched && form.controls.email.invalid){<span class="field-error">Informe um e-mail válido.</span>}
+     <label for="login-senha">Senha</label><div class="field-icon"><input id="login-senha" [type]="exibirSenha?'text':'password'" autocomplete="current-password" formControlName="senha" placeholder="Digite sua senha"><button class="show-password" type="button" (click)="exibirSenha=!exibirSenha" [attr.aria-label]="exibirSenha?'Ocultar senha':'Mostrar senha'">{{exibirSenha?'Ocultar':'Mostrar'}}</button></div>
+     @if(form.controls.senha.touched && form.controls.senha.invalid){<span class="field-error">Informe a senha.</span>}
+     <div class="login-help">Problemas com a senha? Contate o administrador.</div>
+     @if(erro){<div class="alert alert-error" role="alert">{{erro}}</div>}
+     <button class="btn btn-primary login-button" type="submit" [disabled]="carregando">{{carregando?'Entrando…':'Entrar'}}</button>
+    </form>
+    <div class="login-support">Acesso restrito a usuários autorizados.</div>
+   </div>
+  </section>
+ </div>
+</div>

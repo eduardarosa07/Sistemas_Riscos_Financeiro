@@ -1,0 +1,28 @@
+<div class="app-shell" [class.menu-collapsed]="menuRecolhido" [class.menu-mobile-open]="menuCelular">
+ <aside class="sidebar" aria-label="Navegação principal">
+  <div class="brand"><div class="brand-shield">⬡</div><div class="brand-copy"><strong>SGR</strong><span>Sistema de Gerenciamento<br>de Riscos</span></div></div>
+  <div class="nav-caption">ÁREA DE TRABALHO</div>
+  <nav class="nav" aria-label="Menu do sistema">
+   @if(podeDashboard){<a routerLink="/home" routerLinkActive="active" (click)="menuCelular=false"><span>Dashboard</span></a>}
+   @if(podeOperacional){
+    <a routerLink="/clientes" routerLinkActive="active" (click)="menuCelular=false"><span>Clientes</span></a>
+    <button class="nav-parent" type="button" (click)="ocorrenciasAbertas=!ocorrenciasAbertas" [attr.aria-expanded]="ocorrenciasAbertas"><span>Ocorrências</span><span class="chev">{{ocorrenciasAbertas?'⌄':'›'}}</span></button>
+    @if(ocorrenciasAbertas){<div class="submenu"><a routerLink="/ocorrencias/pld" routerLinkActive="active" (click)="menuCelular=false">PLD</a><a routerLink="/ocorrencias/chargeback" routerLinkActive="active" (click)="menuCelular=false">Chargeback</a><a routerLink="/ocorrencias/fraude" routerLinkActive="active" (click)="menuCelular=false">Fraude</a></div>}
+    <a routerLink="/ocorrencias/kyc" routerLinkActive="active" (click)="menuCelular=false"><span>Análises KYC</span></a>
+    <a routerLink="/ocorrencias" routerLinkActive="active" (click)="menuCelular=false"><span>Fila de tratativas</span></a>
+    <a routerLink="/relatorios" routerLinkActive="active" (click)="menuCelular=false"><span>Relatórios</span></a>
+   }
+   @if(podeAdministrar){<a routerLink="/usuarios" routerLinkActive="active" (click)="menuCelular=false"><span>Usuários</span></a>}
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-user"><span class="user-avatar">{{(auth.usuario()?.nome||'U').charAt(0).toUpperCase()}}</span><div><strong>{{auth.usuario()?.nome}}</strong><small>{{auth.usuario()?.perfil}}</small></div></div>
+  <button class="logout" type="button" (click)="sair()">↪ <span>Sair do sistema</span></button>
+ </aside>
+ @if(menuCelular){<button class="sidebar-overlay" aria-label="Fechar menu" (click)="menuCelular=false"></button>}
+ <section class="main-area"><header class="topbar">
+  <button class="hamburger" type="button" aria-label="Abrir ou recolher navegação" (click)="menuCelular=!menuCelular;menuRecolhido=!menuRecolhido">☰</button>
+  <div class="topbar-title">Sistema de Riscos Financeiros <span> / Área segura</span></div>
+  <button class="top-user" (click)="modalSenha=true" aria-label="Alterar minha senha"><span class="user-avatar">{{(auth.usuario()?.nome||'U').charAt(0).toUpperCase()}}</span><span><strong>{{auth.usuario()?.nome||'Usuário'}}</strong><small>Alterar minha senha</small></span></button>
+ </header><main class="page-content"><router-outlet/></main></section>
+</div>
+@if(modalSenha){<div class="modal-backdrop" (click)="modalSenha=false"><div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Alterar minha senha"><div class="modal-head"><h2>Alterar minha senha</h2><button type="button" aria-label="Fechar" (click)="modalSenha=false">×</button></div><form (ngSubmit)="alterarSenha()"><label>Senha atual<input type="password" name="senhaAtual" [(ngModel)]="senhaAtual" required autocomplete="current-password"></label><label>Nova senha<input type="password" name="novaSenha" [(ngModel)]="novaSenha" required minlength="8" autocomplete="new-password"></label><label>Confirmar nova senha<input type="password" name="confirmacao" [(ngModel)]="confirmacao" required autocomplete="new-password"></label>@if(erroSenha){<div class="alert alert-error" role="alert">{{erroSenha}}</div>}<div class="modal-actions"><button type="button" class="btn" (click)="modalSenha=false">Cancelar</button><button type="submit" class="btn btn-primary" [disabled]="salvandoSenha">{{salvandoSenha?'Alterando…':'Alterar senha'}}</button></div></form></div></div>}

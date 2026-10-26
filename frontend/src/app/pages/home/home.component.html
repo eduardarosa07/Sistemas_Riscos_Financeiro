@@ -1,0 +1,21 @@
+<div class="page-head"><div><div class="eyebrow">PAINEL GERENCIAL</div><h1>Indicadores de riscos</h1><p>Dados reais consolidados no PostgreSQL.</p></div><button class="btn" type="button" (click)="limpar()">Limpar filtros</button></div>
+<div class="filter-card sgr-filtros"><label>Data inicial<input type="date" [(ngModel)]="inicio"></label><label>Data final<input type="date" [(ngModel)]="fim"></label><label>Categoria<select [(ngModel)]="categoria"><option value="">Todas</option><option>PLD</option><option value="FRAUDE">Fraude</option><option value="CHARGEBACK">Chargeback</option></select></label><label>Status<select [(ngModel)]="status"><option value="">Todos</option><option value="PENDENTE">Pendente</option><option value="EM_ANALISE">Em análise</option><option value="AGUARDANDO_PARECER">Aguardando parecer</option><option value="CONCLUIDA">Concluída</option></select></label><label>Produto<select [(ngModel)]="produto"><option value="">Todos</option>@for(p of produtos;track p){<option [value]="p">{{p}}</option>}</select></label><button type="button" class="btn btn-primary" (click)="carregar()">Aplicar</button></div>
+@if(erro){<div class="alert alert-error" role="alert">{{erro}}</div>}
+@if(carregando){<div class="loading-card">Calculando indicadores...</div>}
+@if(!carregando&&dados){<div class="kpi-grid safe-summary">
+<div class="kpi-card"><div><span>Ocorrências no filtro</span><strong>{{dados.total}}</strong><small>Todas as categorias</small></div></div>
+<div class="kpi-card"><div><span>Em aberto</span><strong>{{dados.abertas}}</strong><small>Inclui aguardando parecer</small></div></div>
+<div class="kpi-card"><div><span>Concluídas</span><strong>{{dados.concluidas}}</strong><small>Encerramento definitivo</small></div></div>
+<div class="kpi-card"><div><span>Índice de conclusão</span><strong>{{conclusaoPercentual}}%</strong><small>Concluídas sobre total filtrado</small></div></div>
+<div class="kpi-card"><div><span>Ocorrências do mês</span><strong>{{dados.mesAtual}}</strong><small>Considerando os filtros atuais</small></div></div></div>
+<div class="dashboard-bottom"><div class="panel"><h3>Distribuição por categoria</h3><div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Quantidade</th></tr></thead><tbody>@for(cat of dados.porCategoria;track cat.categoria){<tr><td>{{cat.categoria}}</td><td>{{cat.total}}</td></tr>}@empty{<tr><td colspan="2" class="empty">Nenhum registro</td></tr>}</tbody></table></div></div><div class="panel"><h3>Distribuição por status</h3><div class="table-wrap"><table><thead><tr><th>Estado</th><th>Quantidade</th></tr></thead><tbody>@for(s of dados.porStatus;track s.status){<tr><td>{{s.status.replaceAll('_',' ')}}</td><td>{{s.total}}</td></tr>}@empty{<tr><td colspan="2" class="empty">Nenhum registro</td></tr>}</tbody></table></div></div></div>}
+
+@if(!carregando && dados){
+<div class="risk-chart-grid">
+ <section class="panel"><h3>Ocorrências por categoria</h3><app-risk-chart titulo="Ocorrências por categoria" [itens]="categoriaItens"/></section>
+ <section class="panel"><h3>Distribuição percentual dos status</h3><app-risk-chart titulo="Distribuição percentual dos status" tipo="donut" [itens]="statusItens"/></section>
+ <section class="panel"><h3>Ocorrências abertas por categoria</h3><app-risk-chart titulo="Ocorrências abertas por categoria" [itens]="abertasPorCategoria"/></section>
+ <section class="panel"><h3>Ocorrências concluídas por categoria</h3><app-risk-chart titulo="Ocorrências concluídas por categoria" [itens]="concluidasPorCategoria"/></section>
+ <section class="panel risk-chart-wide"><h3>Evolução mensal das ocorrências</h3><app-risk-chart titulo="Evolução mensal das ocorrências" tipo="linha" [itens]="evolucaoItens"/></section>
+</div>
+}

@@ -1,0 +1,22 @@
+<div class="page-head">
+  <div><div class="eyebrow">OCORRÊNCIAS</div><h1>{{titulo}}</h1><p>Consulta dos registros existentes no banco de dados</p></div>
+  <button class="btn" (click)="carregar()">Atualizar</button>
+</div>
+@if(mensagem){<div class="alert" role="status">{{mensagem}}</div>}
+@if (erro) { <div class="alert alert-error">{{erro}}</div> }
+<div class="filter-card">
+  <label>Buscar<input [(ngModel)]="busca" placeholder="ID ou cliente"></label>
+  <label>Status<select [(ngModel)]="status"><option>TODOS</option><option>PENDENTE</option><option>EM ANALISE</option><option>FECHADO</option><option>ENCERRADO</option><option>APROVADO</option><option>REPROVADO</option></select></label>
+  <label>Risco<select [(ngModel)]="risco"><option>TODOS</option><option>CRIT</option><option>ALT</option><option>MED</option><option>BAIX</option></select></label>
+</div>
+<div class="panel table-panel">
+  <div class="panel-title"><h3>{{titulo}} registrados</h3><span class="count-pill">{{filtrados.length}} registro(s)</span></div>
+  @if (carregando) {<div class="loading-card">Carregando...</div>}
+  @if (!carregando) {
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Tipo</th><th>Valor</th><th>Risco</th><th>Data</th><th>Status</th><th>Responsável</th></tr></thead>
+    <tbody>@for(o of filtrados; track o.id){<tr><td><strong>#{{o.id}}</strong></td><td>{{o.clienteNome}}</td><td>{{o.tipo}}</td><td>{{o.valor|currency:'BRL'}}</td><td><span class="risk-pill {{classeRisco(o.risco)}}">{{o.risco}}</span></td><td>{{o.data|date:'dd/MM/yyyy'}}</td><td><span class="status-pill">{{labelStatus(o.status)}}</span></td><td>{{o.responsavel || '—'}}</td></tr>} @empty {<tr><td colspan="8" class="empty">Nenhum registro encontrado.</td></tr>}</tbody>
+    </table></div>
+  }
+</div>
+
+@if(podeDecidirKyc){<div class="panel" style="margin-top:20px"><h3>Decisão cadastral KYC</h3><p>Somente Analistas podem registrar o parecer e aceitar ou não aceitar o cliente. A decisão é definitiva para esta análise.</p><label>Identificador da análise<select [(ngModel)]="kycSelecionado"><option value="">Selecione uma análise</option>@for(o of filtrados;track o.id){<option [value]="o.id">{{o.id}} — {{o.clienteNome}}</option>}</select></label><label>Decisão<select [(ngModel)]="decisaoKyc"><option value="ACEITO">Aceitar cliente</option><option value="NAO_ACEITO">Não aceitar — inativar cliente</option></select></label><label>Parecer e justificativa<textarea class="sgr-textarea" rows="4" [(ngModel)]="parecer" placeholder="Registre o parecer técnico"></textarea></label><button class="btn btn-primary" [disabled]="salvando || !kycSelecionado || !parecer.trim()" (click)="decidirKyc()">Registrar decisão KYC</button></div>}
