@@ -1,0 +1,2 @@
+Comando: node node_modules/@angular/compiler-cli/bundles/src/bin/ngc.js -p tsconfig.app.json --noEmit
+Resultado: exit code 0; sem erros de TypeScript ou templates.

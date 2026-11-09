@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import {
-  AlertaFraude, AlertaPld, Chargeback, Cliente, ClienteHistorico, Tratativa, TratativaEvento, IndicadoresOcorrencias,
+  AlertaFraude, AlertaPld, Chargeback, Cliente, ClienteResumo, ClienteHistorico, Tratativa, TratativaEvento, ContextoTratativa, IndicadoresOcorrencias,
   Kyc, LoginResponse, RiscoCliente, Usuario
 } from './models';
 
@@ -30,6 +30,10 @@ export class ApiService {
 
   clientes(): Observable<Cliente[]> {
     return this.http.get<Cliente[]>(`${this.baseUrl}/clientes`);
+  }
+
+  clientesVisao(): Observable<ClienteResumo[]> {
+    return this.http.get<ClienteResumo[]>(`${this.baseUrl}/clientes/visao`);
   }
 
   clienteHistorico(id: string): Observable<ClienteHistorico> {
@@ -91,9 +95,21 @@ export class ApiService {
   redefinirSenha(id:number,novaSenha:string):Observable<void>{
     return this.http.post<void>(`${this.baseUrl}/usuarios/${id}/redefinir-senha`,{novaSenha});
   }
-  tratativas(filtros: { categoria?:string; status?:string; inicio?:string; fim?:string; produto?:string; decisao?:string; responsavel?:string } = {}):Observable<Tratativa[]> {
+  tratativas(filtros: { visao?:string; categoria?:string; status?:string; inicio?:string; fim?:string; produto?:string; decisao?:string; responsavel?:string } = {}):Observable<Tratativa[]> {
     let params=new HttpParams();Object.entries(filtros).forEach(([k,v])=>{if(v)params=params.set(k,v);});
     return this.http.get<Tratativa[]>(`${this.baseUrl}/tratativas`,{params});
+  }
+  tratativaPorOrigem(categoria:string,origemId:string):Observable<Tratativa>{
+    return this.http.get<Tratativa>(`${this.baseUrl}/tratativas/origem`,{params:{categoria,origemId}});
+  }
+  contextoTratativa(id:number):Observable<ContextoTratativa>{
+    return this.http.get<ContextoTratativa>(`${this.baseUrl}/tratativas/${id}/contexto`);
+  }
+  filaKyc(visao:'PENDENTES'|'HISTORICO'='PENDENTES'):Observable<Kyc[]>{
+    return this.http.get<Kyc[]>(`${this.baseUrl}/kycs/fila`,{params:{visao}});
+  }
+  historicoKyc(id:string):Observable<TratativaEvento[]>{
+    return this.http.get<TratativaEvento[]>(`${this.baseUrl}/kycs/${encodeURIComponent(id)}/historico`);
   }
   assumirTratativa(id:number):Observable<Tratativa>{return this.http.post<Tratativa>(`${this.baseUrl}/tratativas/${id}/assumir`,{});}
   solicitarParecer(id:number,justificativa:string):Observable<Tratativa>{return this.http.post<Tratativa>(`${this.baseUrl}/tratativas/${id}/parecer`,{justificativa});}

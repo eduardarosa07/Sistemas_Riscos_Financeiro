@@ -15,12 +15,12 @@
     <div><span>Score geral</span><strong>{{ d.riscoCliente?.scoreRiscoGeral ?? '—' }}</strong></div>
   </section>
 
-  <!-- Contadores segmentados: KYC é avaliação cadastral, não ocorrência de risco. -->
+  <!-- Contadores segmentados por categoria, incluindo análises cadastrais KYC. -->
   <section class="kpi-grid safe-summary" aria-label="Contadores de ocorrências do cliente">
     <div class="kpi-card"><div><span>Alertas PLD</span><strong>{{d.alertasPld.length}}</strong><small>Vinculados ao cliente</small></div></div>
     <div class="kpi-card"><div><span>Alertas de fraude</span><strong>{{d.alertasFraude.length}}</strong><small>Vinculados ao cliente</small></div></div>
     <div class="kpi-card"><div><span>Chargebacks</span><strong>{{d.chargebacks.length}}</strong><small>Contestações vinculadas</small></div></div>
-    <div class="kpi-card"><div><span>Avaliações KYC</span><strong>{{d.kycs.length}}</strong><small>Cadastro — não integra ocorrências</small></div></div>
+    <div class="kpi-card"><div><span>Avaliações KYC</span><strong>{{d.kycs.length}}</strong><small>Cadastro — integra a fila de tratativas</small></div></div>
   </section>
 
   <div class="tabs">

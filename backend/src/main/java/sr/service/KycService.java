@@ -20,6 +20,9 @@ public class KycService {
         return repository.findAll();
     }
 
+    public List<Kyc> listarPendentes() { return repository.buscarPendentes(); }
+    public List<Kyc> listarConcluidos() { return repository.buscarConcluidos(); }
+
     public Kyc buscarPorId(String id) {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Kyc não encontrado: " + id));
     }

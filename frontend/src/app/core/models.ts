@@ -14,6 +14,16 @@ export interface Cliente {
   origemCadastro: string;
 }
 
+export interface ClienteResumo {
+  idCliente:string; tipoPessoa:string; nomeRazaoSocial:string; documentoFicticio:string;
+  statusCliente:string; cidade:string; uf:string; riscoGeral:string; scoreRiscoGeral:number;
+  qtdAlertasFraude:number; qtdAlertasPld:number; qtdChargebacks:number;
+}
+export interface ContextoTratativa {
+  id:number;origemId:string;categoria:string;clienteId:string|null;clienteNome:string|null;
+  clienteStatus:string|null;riscoGeral:string|null;scoreRiscoGeral:number|null;
+}
+
 export interface Conta {
   idConta: string;
   cliente: Cliente;
@@ -198,7 +208,7 @@ export interface OcorrenciaView {
   resultado?: string;
 }
 
-export interface Tratativa {id:number;categoria:'PLD'|'FRAUDE'|'CHARGEBACK';origemId:string;status:'PENDENTE'|'EM_ANALISE'|'AGUARDANDO_PARECER'|'CONCLUIDA';responsavelId:number|null;responsavelNome:string|null;produto:string|null;clienteId:string|null;dataOcorrencia:string|null;valor:number|null;risco:string|null;decisao:string|null;justificativa:string|null;criadoEm:string;atualizadoEm:string;concluidoEm:string|null;}
+export interface Tratativa {id:number;categoria:'KYC'|'PLD'|'FRAUDE'|'CHARGEBACK';origemId:string;status:'PENDENTE'|'EM_ANALISE'|'AGUARDANDO_PARECER'|'CONCLUIDA';responsavelId:number|null;responsavelNome:string|null;produto:string|null;clienteId:string|null;dataOcorrencia:string|null;valor:number|null;risco:string|null;decisao:string|null;justificativa:string|null;criadoEm:string;atualizadoEm:string;concluidoEm:string|null;}
 export interface TratativaEvento {id:number;ocorrencia_id:number;executor_id:number;executor_nome:string;status_anterior:string|null;status_novo:string;acao:string;decisao:string|null;justificativa:string|null;registrado_em:string;}
 
-export interface IndicadoresOcorrencias{total:number;concluidas:number;abertas:number;mesAtual:number;porCategoria:{categoria:string;total:number}[];porStatus:{status:string;total:number}[];porCategoriaStatus:{categoria:string;status:string;total:number}[];evolucao:{periodo:string;total:number}[];}
+export interface IndicadoresOcorrencias{total:number;concluidas:number;abertas:number;diaAtual:number;mesAtual:number;porProduto:{produto:string;total:number}[];porCategoria:{categoria:string;total:number}[];porStatus:{status:string;total:number}[];porCategoriaStatus:{categoria:string;status:string;total:number}[];evolucao:{periodo:string;total:number}[];}

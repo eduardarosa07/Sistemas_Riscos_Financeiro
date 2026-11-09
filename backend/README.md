@@ -5,7 +5,7 @@ O pgAdmin pode ser usado para criar, consultar e administrar o banco PostgreSQL.
 
 ## Requisitos
 
-- Java 25 (LTS)
+- Java 21 (versão do pom.xml)
 - PostgreSQL
 - pgAdmin (opcional, recomendado para administracao visual)
 - Maven Wrapper incluido no projeto

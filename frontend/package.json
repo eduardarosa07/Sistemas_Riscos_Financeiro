@@ -6,7 +6,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "watch": "ng build --watch --configuration development",
+    "test:unit": "node node_modules/typescript/bin/tsc --module commonjs --target es2020 --skipLibCheck --outDir .unit-test src/app/core/filtros-risco.ts src/app/core/permissions.ts && node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@angular/animations": "^20.2.0",

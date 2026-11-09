@@ -1,0 +1,110 @@
+
+> sistemas-riscos-financeiros-frontend@1.0.0 test:unit
+> node node_modules/typescript/bin/tsc --module commonjs --target es2020 --skipLibCheck --outDir .unit-test src/app/core/filtros-risco.ts src/app/core/permissions.ts && node --test tests/*.test.cjs
+
+TAP version 13
+# Subtest: RF29: data inicial anterior à final
+ok 1 - RF29: data inicial anterior à final
+  ---
+  duration_ms: 6.694566
+  type: 'test'
+  ...
+# Subtest: RF29: datas invertidas
+ok 2 - RF29: datas invertidas
+  ---
+  duration_ms: 0.196907
+  type: 'test'
+  ...
+# Subtest: RF29: período aberto permitido
+ok 3 - RF29: período aberto permitido
+  ---
+  duration_ms: 0.099858
+  type: 'test'
+  ...
+# Subtest: RF29: formato inválido rejeitado
+ok 4 - RF29: formato inválido rejeitado
+  ---
+  duration_ms: 5.605246
+  type: 'test'
+  ...
+# Subtest: RF30-RF33: serializar seleções combinadas
+ok 5 - RF30-RF33: serializar seleções combinadas
+  ---
+  duration_ms: 0.348
+  type: 'test'
+  ...
+# Subtest: RF30-RF33: seleção vazia equivale a todas
+ok 6 - RF30-RF33: seleção vazia equivale a todas
+  ---
+  duration_ms: 0.149983
+  type: 'test'
+  ...
+# Subtest: RF06: lista sem filtros
+ok 7 - RF06: lista sem filtros
+  ---
+  duration_ms: 0.229221
+  type: 'test'
+  ...
+# Subtest: RF06: busca por nome
+ok 8 - RF06: busca por nome
+  ---
+  duration_ms: 2.877178
+  type: 'test'
+  ...
+# Subtest: RF06: busca por documento
+ok 9 - RF06: busca por documento
+  ---
+  duration_ms: 0.331028
+  type: 'test'
+  ...
+# Subtest: RF39: filtrar por risco geral
+ok 10 - RF39: filtrar por risco geral
+  ---
+  duration_ms: 0.52609
+  type: 'test'
+  ...
+# Subtest: RF06: filtros de situação e tipo combinados
+ok 11 - RF06: filtros de situação e tipo combinados
+  ---
+  duration_ms: 2.376806
+  type: 'test'
+  ...
+# Subtest: RF05: perfil analista possui visão operacional
+ok 12 - RF05: perfil analista possui visão operacional
+  ---
+  duration_ms: 2.128605
+  type: 'test'
+  ...
+# Subtest: RF05: usuário padrão não pode operar
+ok 13 - RF05: usuário padrão não pode operar
+  ---
+  duration_ms: 0.111453
+  type: 'test'
+  ...
+# Subtest: RF34: somente administrador pode administrar
+ok 14 - RF34: somente administrador pode administrar
+  ---
+  duration_ms: 0.071057
+  type: 'test'
+  ...
+# Subtest: RF34: gestor não pode administrar
+ok 15 - RF34: gestor não pode administrar
+  ---
+  duration_ms: 0.049868
+  type: 'test'
+  ...
+# Subtest: RF23: somente analista pode tratar
+ok 16 - RF23: somente analista pode tratar
+  ---
+  duration_ms: 0.057075
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 246.353308

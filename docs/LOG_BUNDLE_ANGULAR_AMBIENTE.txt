@@ -1,0 +1,3 @@
+Tentativa: node node_modules/@angular/cli/bin/ng.js build --configuration development
+Resultado: dependências Angular foram extraídas do ZIP Windows; pacote nativo @esbuild/win32-x64 não executa no Linux.
+Recomendado: no Windows, npm ci && npm run build.

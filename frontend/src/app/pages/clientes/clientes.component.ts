@@ -2,42 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
-import { Cliente } from '../../core/models';
+import { ClienteResumo } from '../../core/models';
+import {filtrarClientes} from '../../core/filtros-risco';
 
-@Component({
-  selector: 'app-clientes',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './clientes.component.html'
-})
+@Component({selector:'app-clientes',standalone:true,imports:[FormsModule],templateUrl:'./clientes.component.html'})
 export class ClientesComponent implements OnInit {
-  clientes: Cliente[] = [];
-  carregando = true;
-  erro = '';
-  busca = '';
-  tipo = 'TODOS';
-  situacao = 'TODAS';
-
-  constructor(private api: ApiService, private router: Router) {}
-  ngOnInit(): void { this.carregar(); }
-
-  carregar(): void {
-    this.carregando = true; this.erro = '';
-    this.api.clientes().subscribe({
-      next: x => { this.clientes = x; this.carregando = false; },
-      error: () => { this.carregando = false; this.erro = 'Backend indisponível. Nenhum dado de demonstração será exibido.'; }
-    });
-  }
-
-  get filtrados(): Cliente[] {
-    const q = this.busca.trim().toLowerCase();
-    return this.clientes.filter(c =>
-      (!q || c.idCliente.toLowerCase().includes(q) || c.nomeRazaoSocial.toLowerCase().includes(q) || c.documentoFicticio.toLowerCase().includes(q)) &&
-      (this.tipo === 'TODOS' || c.tipoPessoa === this.tipo) &&
-      (this.situacao === 'TODAS' || c.statusCliente.toUpperCase() === this.situacao)
-    );
-  }
-
-  limpar(): void { this.busca = ''; this.tipo = 'TODOS'; this.situacao = 'TODAS'; }
-  abrir(c: Cliente): void { this.router.navigate(['/clientes', c.idCliente]); }
+  clientes:ClienteResumo[]=[]; carregando=true;erro='';
+  busca='';tipo='TODOS';situacao='TODAS';risco='TODOS';
+  // Filtros editáveis só são aplicados ao clicar em Filtrar.
+  aplicados={busca:'',tipo:'TODOS',situacao:'TODAS',risco:'TODOS'};
+  constructor(private api:ApiService,private router:Router){}
+  ngOnInit():void{this.carregar();}
+  carregar():void{this.carregando=true;this.erro='';this.api.clientesVisao().subscribe({
+    next:x=>{this.clientes=x;this.carregando=false;},
+    error:()=>{this.carregando=false;this.erro='Não foi possível consultar clientes e riscos consolidados.';}
+  });}
+  filtrar():void{this.aplicados={busca:this.busca,tipo:this.tipo,situacao:this.situacao,risco:this.risco};}
+  limpar():void{this.busca='';this.tipo='TODOS';this.situacao='TODAS';this.risco='TODOS';this.filtrar();}
+  get filtrados():ClienteResumo[]{return filtrarClientes(this.clientes,this.aplicados);}
+  abrir(c:ClienteResumo):void{this.router.navigate(['/clientes',c.idCliente]);}
 }

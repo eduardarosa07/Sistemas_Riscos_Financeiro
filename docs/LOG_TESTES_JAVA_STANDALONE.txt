@@ -1,0 +1,3 @@
+Comando: javac -encoding UTF-8 -d <pasta> src/main/java/sr/domain/*.java src/test/java/sr/domain/RegrasStandalone.java
+Comando: java -cp <pasta> sr.domain.RegrasStandalone
+Resultado: APROVADOS 20 testes de regras de domínio. Não são testes de integração.

@@ -1,0 +1,3 @@
+Execução tentada com bash ./mvnw -o -q -DskipTests compile.
+Resultado: wget: Failed to fetch https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.zip
+Interpretação: dependências indisponíveis; compilação e JUnit Spring não realizados.

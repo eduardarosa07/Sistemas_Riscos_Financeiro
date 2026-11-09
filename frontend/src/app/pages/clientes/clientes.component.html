@@ -14,7 +14,9 @@
   <label>Situação
     <select [(ngModel)]="situacao"><option value="TODAS">Todas</option><option value="ATIVO">Ativo</option><option value="INATIVO">Inativo</option></select>
   </label>
-  <button class="btn ghost btn-limpar-clientes" (click)="limpar()">Limpar filtros</button>
+  <label>Risco geral<select [(ngModel)]="risco"><option value="TODOS">Todos</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option><option value="CRITICO">Crítico</option><option value="NÃO CLASSIFICADO">Não classificado</option></select></label>
+  <button class="btn btn-primary" type="button" (click)="filtrar()">Filtrar</button>
+  <button class="btn ghost btn-limpar-clientes" type="button" (click)="limpar()">Limpar filtros</button>
 </div>
 
 <div class="panel table-panel">
@@ -23,7 +25,7 @@
   @if (!carregando) {
     <div class="table-wrap">
       <table class="clickable-table">
-        <thead><tr><th>Código</th><th>Nome / Razão social</th><th>Documento</th><th>Tipo</th><th>Cidade</th><th>Situação</th></tr></thead>
+        <thead><tr><th>Código</th><th>Nome / Razão social</th><th>Documento</th><th>Tipo</th><th>Risco geral</th><th>Situação</th></tr></thead>
         <tbody>
           @for (c of filtrados; track c.idCliente) {
             <tr (click)="abrir(c)">
@@ -31,7 +33,7 @@
               <td>{{ c.nomeRazaoSocial }}</td>
               <td>{{ c.documentoFicticio }}</td>
               <td>{{ c.tipoPessoa === 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física' }}</td>
-              <td>{{ c.cidade }}/{{ c.uf }}</td>
+              <td><span class="risk-pill">{{ c.riscoGeral }}</span></td>
               <td><span class="status-pill" [class.status-active]="c.statusCliente==='ATIVO'" [class.status-inactive]="c.statusCliente==='INATIVO'">{{ c.statusCliente }}</span></td>
             </tr>
           } @empty {
