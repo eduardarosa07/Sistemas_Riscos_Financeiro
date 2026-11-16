@@ -16,7 +16,7 @@ export interface Cliente {
 
 export interface ClienteResumo {
   idCliente:string; tipoPessoa:string; nomeRazaoSocial:string; documentoFicticio:string;
-  statusCliente:string; cidade:string; uf:string; riscoGeral:string; scoreRiscoGeral:number;
+  statusCliente:string; cidade:string; uf:string; riscoGeral:string; scoreRiscoGeral?:number|null;
   qtdAlertasFraude:number; qtdAlertasPld:number; qtdChargebacks:number;
 }
 export interface ContextoTratativa {

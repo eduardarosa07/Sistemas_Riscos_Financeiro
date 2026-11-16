@@ -1,5 +1,6 @@
 **/node_modules/
 **/.angular/
+**/.unit-test/
 **/target/
 **/dist/
 **/.venv/

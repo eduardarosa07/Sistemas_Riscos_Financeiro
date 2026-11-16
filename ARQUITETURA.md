@@ -12,6 +12,21 @@
 
 O Angular nunca acessa o PostgreSQL diretamente. Ele consome `/api/**` em JSON.
 
+## Origem dos dados de clientes e risco
+
+Diretriz confirmada pelo responsável pelo projeto em 15/11/2026: os dados de
+clientes, scores e níveis de risco são fornecidos por uma fonte externa. O SGR
+apenas consulta esses dados e os exibe na interface, por meio da API e das tabelas
+de origem. Não cabe ao SGR cadastrar clientes nem gerar, calcular ou reclassificar
+seus scores e níveis de risco, seja no frontend, no backend ou no banco de dados.
+
+Quando o risco ou score não for informado pela fonte, a interface deve sinalizar
+a ausência do dado, sem inventar uma classificação ou transformar a ausência em
+score zero. Contagens e somas gerenciais de registros existentes não constituem
+cálculo de risco. Os registros operacionais de usuários e tratativas permanecem
+no escopo existente; essa diretriz não autoriza novas alterações nos dados de
+origem dos clientes.
+
 ## Usuários e segurança
 A tabela `usuario` contém nome, email, `senha_hash`, perfil e status.
 A senha original nunca é gravada no banco. O backend usa BCrypt.

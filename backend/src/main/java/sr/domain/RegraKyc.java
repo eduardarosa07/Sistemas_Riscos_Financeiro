@@ -67,7 +67,7 @@ public final class RegraKyc {
      * submetidas novamente a decisao.
      */
     public static boolean encerrada(String status) {
-
+        status = status == null ? "" : status.trim();
         return "ACEITO".equalsIgnoreCase(status)
                 || "NAO_ACEITO".equalsIgnoreCase(status)
                 || "APROVADO".equalsIgnoreCase(status)

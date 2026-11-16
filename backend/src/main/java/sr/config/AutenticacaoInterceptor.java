@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
 import sr.dto.LoginResponse;
 import sr.model.Usuario;
@@ -76,7 +77,14 @@ public class AutenticacaoInterceptor implements HandlerInterceptor {
         );
 
         // Dados da requisição
-        String path = request.getRequestURI();
+        // Autorizar a rota reconhecida pelo MVC, nunca a representação bruta
+        // da URL. Segmentos codificados e parâmetros de matriz podem representar
+        // o mesmo endpoint. Sem um mapeamento conhecido, negar o acesso.
+        Object mapeamento = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        if (!(mapeamento instanceof String path)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return false;
+        }
         String method = request.getMethod();
         String perfil = user.getPerfil();
 
@@ -173,7 +181,7 @@ public class AutenticacaoInterceptor implements HandlerInterceptor {
         } else {
 
             // Acesso aos demais módulos operacionais
-            acessoNegado = !operacional;
+            acessoNegado = !operacional || !leitura;
         }
 
         if (acessoNegado) {

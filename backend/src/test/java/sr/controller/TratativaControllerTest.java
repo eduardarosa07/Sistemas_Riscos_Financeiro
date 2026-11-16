@@ -65,6 +65,15 @@ class TratativaControllerTest {
     private static final long OCORRENCIA_ID = 47L;
     private static final long ANALISTA_ID = 18L;
 
+    @Test
+    void consultaDeOrigemNaoDeveSincronizarOuAlterarDados() {
+        ResponseStatusException erro = assertThrows(ResponseStatusException.class,
+            () -> controller.porOrigem("PLD", "ORIGEM_INEXISTENTE"));
+        assertEquals(HttpStatus.NOT_FOUND, erro.getStatusCode());
+        verifyNoInteractions(sincronizacao);
+        verify(jdbc, never()).update(anyString(), any(Object[].class));
+    }
+
     /**
      * Simula a autenticacao de um analista.
      */

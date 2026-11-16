@@ -20,14 +20,13 @@ END $$;
 INSERT INTO public.ocorrencia_tratativa
   (categoria,origem_id,status,cliente_id,data_ocorrencia,risco,decisao,justificativa,concluido_em)
 SELECT 'KYC', k.id_kyc,
-  CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
+  CASE WHEN UPPER(TRIM(COALESCE(k.status_kyc,''))) IN ('ACEITO','NAO_ACEITO','APROVADO','REPROVADO')
        THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
   k.id_cliente, k.data_analise::timestamp, k.nivel_risco_kyc,
-  CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
-       THEN UPPER(k.status_kyc) ELSE NULL END,
+  CASE WHEN UPPER(TRIM(COALESCE(k.status_kyc,''))) IN ('ACEITO','NAO_ACEITO')
+       THEN UPPER(TRIM(k.status_kyc)) ELSE NULL END,
   k.motivo_decisao,
-  CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
-       THEN k.data_analise::timestamp ELSE NULL END
+  NULL
 FROM public.fato_kyc k
 ON CONFLICT(categoria,origem_id) DO NOTHING;
 

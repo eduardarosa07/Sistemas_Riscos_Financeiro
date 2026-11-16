@@ -9,8 +9,8 @@ import java.util.List;
 public interface KycRepository extends JpaRepository<Kyc, String> {
 
     List<Kyc> findByCliente_IdCliente(String idCliente);
-    @Query("select k from Kyc k where upper(k.statusKyc) in ('ACEITO','NAO_ACEITO')")
+    @Query("select k from Kyc k where upper(trim(k.statusKyc)) in ('ACEITO','NAO_ACEITO','APROVADO','REPROVADO')")
     List<Kyc> buscarConcluidos();
-    @Query("select k from Kyc k where upper(coalesce(k.statusKyc,'')) not in ('ACEITO','NAO_ACEITO')")
+    @Query("select k from Kyc k where upper(trim(coalesce(k.statusKyc,''))) not in ('ACEITO','NAO_ACEITO','APROVADO','REPROVADO')")
     List<Kyc> buscarPendentes();
 }

@@ -1,4 +1,5 @@
-import {Component,OnInit} from '@angular/core';
+import {Component,OnDestroy,OnInit} from '@angular/core';
+import {Subscription} from 'rxjs';
 import {CurrencyPipe,DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ApiService} from '../../core/api.service';
@@ -7,15 +8,21 @@ import {exportarExcel} from '../../core/exportar-excel';
 import {exportarPdf} from '../../core/exportar-pdf';
 import {periodoValido} from '../../core/filtros-risco';
 @Component({selector:'app-relatorios',standalone:true,imports:[FormsModule,CurrencyPipe,DatePipe],templateUrl:'./relatorios.component.html'})
-export class RelatoriosComponent implements OnInit {
+export class RelatoriosComponent implements OnInit,OnDestroy {
  dados:Tratativa[]=[];erro='';carregando=true;
  inicio='';fim='';categoria='';status='';produto='';decisao='';busca='';produtos:string[]=[];
+ private consulta?:Subscription;
+ private consultaProdutos?:Subscription;
+ private versao=0;
  // Os dados já são filtrados pelo servidor: o mesmo conjunto alimenta tela, PDF e Excel.
  constructor(private api:ApiService){}
- ngOnInit():void{this.api.produtos().subscribe({next:lista=>this.produtos=lista,error:()=>this.produtos=[]});this.carregar();}
- carregar():void{if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial deve ser menor ou igual à final.';return;}
-  this.carregando=true;this.erro='';this.api.tratativas({visao:'TODAS',inicio:this.inicio,fim:this.fim,categoria:this.categoria,status:this.status,produto:this.produto,decisao:this.decisao,responsavel:this.busca}).subscribe({
-    next:d=>{this.dados=d;this.carregando=false;},error:e=>{this.carregando=false;this.erro=e?.error?.detail||e?.error?.erro||'Falha ao consultar relatório.';}
+ ngOnInit():void{this.consultaProdutos=this.api.produtos().subscribe({next:lista=>this.produtos=lista,error:()=>this.produtos=[]});this.carregar();}
+ ngOnDestroy():void{this.versao++;this.consulta?.unsubscribe();this.consultaProdutos?.unsubscribe();}
+ carregar():void{
+  const versao=++this.versao;this.consulta?.unsubscribe();this.dados=[];this.carregando=false;
+  if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial deve ser menor ou igual à final.';return;}
+  this.carregando=true;this.erro='';this.consulta=this.api.tratativas({visao:'TODAS',inicio:this.inicio,fim:this.fim,categoria:this.categoria,status:this.status,produto:this.produto,decisao:this.decisao,responsavel:this.busca}).subscribe({
+    next:d=>{if(versao===this.versao){this.dados=d;this.carregando=false;}},error:e=>{if(versao===this.versao){this.carregando=false;this.erro=e?.error?.detail||e?.error?.erro||'Falha ao consultar relatório.';}}
   });}
  limpar():void{this.inicio='';this.fim='';this.categoria='';this.status='';this.produto='';this.decisao='';this.busca='';this.carregar();}
  get filtrados(){return this.dados;}
