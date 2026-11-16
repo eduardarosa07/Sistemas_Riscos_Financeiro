@@ -392,17 +392,6 @@ public class TratativaController {
 
         if (rows.isEmpty()) {
 
-            sincronizacao.atualizar();
-
-            rows = db.queryForList(
-                consulta,
-                categoria,
-                origemId
-            );
-        }
-
-        if (rows.isEmpty()) {
-
             throw new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Ocorrência de origem não encontrada"

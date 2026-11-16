@@ -13,7 +13,11 @@ export function estaAberta(status: string): boolean {
 
 export function estaConcluida(status: string): boolean {
   const s = statusNormalizado(status);
-  return ['CONCLUIDA', 'FECHADO', 'ENCERRADO', 'APROVADO', 'REPROVADO', 'CONCLUIDO', 'RESOLVIDO', 'FINALIZADO'].includes(s);
+  return ['CONCLUIDA', 'FECHADO', 'ENCERRADO', 'APROVADO', 'REPROVADO', 'ACEITO', 'NAO ACEITO', 'CONCLUIDO', 'RESOLVIDO', 'FINALIZADO'].includes(s);
+}
+
+export function kycEncerrado(status?: string | null): boolean {
+  return ['ACEITO', 'NAO ACEITO', 'APROVADO', 'REPROVADO'].includes(statusNormalizado(status));
 }
 
 export function ocorrenciasDe(
@@ -65,7 +69,9 @@ export function ocorrenciasDe(
       categoria: 'Chargeback' as const,
       tipo: x.motivoChargeback || x.modalidade,
       valor: Number(x.valorContestado || 0),
-      risco: x.fraudeDeclarada ? 'ALTO' : 'NÃO CLASSIFICADO',
+      // A origem de chargeback não fornece classificação de risco.
+      // Fraude declarada não autoriza o SGR a criar essa classificação.
+      risco: '',
       data: x.dataContestacao,
       status: x.statusChargeback,
       resultado: x.resultadoInvestigacao

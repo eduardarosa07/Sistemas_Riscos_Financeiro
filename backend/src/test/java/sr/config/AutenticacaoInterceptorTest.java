@@ -6,6 +6,7 @@ import sr.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.HandlerMapping;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -15,6 +16,7 @@ class AutenticacaoInterceptorTest {
  private final AutenticacaoInterceptor guard=new AutenticacaoInterceptor(repo);
  private MockHttpServletRequest request(String perfil,String rota,String metodo){
   var req=new MockHttpServletRequest(metodo,rota);req.setRequestURI(rota);
+  req.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE,rota);
   req.getSession().setAttribute("usuarioLogado",new LoginResponse(8L,"Usuário Teste","teste@exemplo.test",perfil));
   req.getSession().setAttribute("sessaoVersao",0L);
   var u=new Usuario();u.setId(8L);u.setNome("Usuário Teste");u.setEmail("teste@exemplo.test");u.setPerfil(perfil);u.setStatus("ATIVO");
@@ -29,4 +31,10 @@ class AutenticacaoInterceptorTest {
  @Test void rf23_analistaPodeTratarOcorrencia(){assertEquals(200,status("ANALISTA","/api/tratativas/4/concluir","POST"));}
  @Test void rf35_apenasAnalistaPodeDecidirKyc(){assertEquals(403,status("GESTOR","/api/kycs/KYC1/decisao","POST"));assertEquals(200,status("ANALISTA","/api/kycs/KYC1/decisao","POST"));}
  @Test void rf05_administradorNaoPodeConsultarOperacional(){assertEquals(403,status("ADMINISTRADOR","/api/clientes","GET"));}
+ @Test void rotaSemMapeamentoNaoPodeSerAutorizada(){
+  var req=request("GESTOR","/api/clientes","DELETE");
+  req.removeAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+  var res=new MockHttpServletResponse();
+  assertFalse(guard.preHandle(req,res,null));assertEquals(403,res.getStatus());
+ }
 }

@@ -32,7 +32,7 @@ public class ClienteController {
              c.nome_razao_social AS "nomeRazaoSocial",c.documento_ficticio AS "documentoFicticio",
              c.status_cliente AS "statusCliente",c.cidade,c.uf,
              COALESCE(r.nivel_risco,'NÃO CLASSIFICADO') AS "riscoGeral",
-             COALESCE(r.score_risco_geral,0) AS "scoreRiscoGeral",
+             r.score_risco_geral AS "scoreRiscoGeral",
              COALESCE(r.qtd_alertas_fraude,0) AS "qtdAlertasFraude",
              COALESCE(r.qtd_alertas_pld,0) AS "qtdAlertasPld",
              COALESCE(r.qtd_chargebacks,0) AS "qtdChargebacks"

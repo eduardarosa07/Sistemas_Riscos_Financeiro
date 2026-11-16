@@ -2,6 +2,7 @@ package sr.service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SincronizacaoOcorrenciasService {
     private final JdbcTemplate jdbc;
+    @Value("${sgr.sincronizacao.automatica:true}")
+    private boolean sincronizacaoAutomatica = true;
     public SincronizacaoOcorrenciasService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
     @Transactional
@@ -20,8 +23,8 @@ public class SincronizacaoOcorrenciasService {
             INSERT INTO public.ocorrencia_tratativa
                 (categoria,origem_id,status,cliente_id,data_ocorrencia,valor,risco)
             SELECT 'PLD',p.id_alerta_pld,
-              CASE WHEN UPPER(COALESCE(p.status_analise,'')) IN
-                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO')
+              CASE WHEN UPPER(TRIM(COALESCE(p.status_analise,''))) IN
+                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO')
                  THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
               p.id_cliente_analisado,p.data_alerta,p.valor_relacionado,p.severidade
             FROM public.fato_alerta_pld p
@@ -31,8 +34,8 @@ public class SincronizacaoOcorrenciasService {
             INSERT INTO public.ocorrencia_tratativa
                 (categoria,origem_id,status,cliente_id,data_ocorrencia,valor,risco)
             SELECT 'FRAUDE',f.id_alerta_fraude,
-              CASE WHEN UPPER(COALESCE(f.status_analise,'')) IN
-                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO')
+              CASE WHEN UPPER(TRIM(COALESCE(f.status_analise,''))) IN
+                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO')
                  THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
               f.id_cliente_origem,f.data_alerta,f.valor_exposto,f.severidade
             FROM public.fato_alerta_fraude f
@@ -42,8 +45,8 @@ public class SincronizacaoOcorrenciasService {
             INSERT INTO public.ocorrencia_tratativa
                 (categoria,origem_id,status,cliente_id,data_ocorrencia,valor)
             SELECT 'CHARGEBACK',c.id_chargeback,
-              CASE WHEN UPPER(COALESCE(c.status_chargeback,'')) IN
-                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','RESOLVIDO')
+              CASE WHEN UPPER(TRIM(COALESCE(c.status_chargeback,''))) IN
+                 ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO','RESOLVIDO')
                  THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
               c.id_cliente,c.data_transacao,c.valor_contestado
             FROM public.fato_chargeback c
@@ -53,14 +56,12 @@ public class SincronizacaoOcorrenciasService {
             INSERT INTO public.ocorrencia_tratativa
                 (categoria,origem_id,status,cliente_id,data_ocorrencia,risco,decisao,justificativa,concluido_em)
             SELECT 'KYC',k.id_kyc,
-              CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
+              CASE WHEN UPPER(TRIM(COALESCE(k.status_kyc,''))) IN ('ACEITO','NAO_ACEITO','APROVADO','REPROVADO')
                   THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
               k.id_cliente,k.data_analise::timestamp,k.nivel_risco_kyc,
-              CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
-                  THEN UPPER(k.status_kyc) ELSE NULL END,
-              k.motivo_decisao,
-              CASE WHEN UPPER(COALESCE(k.status_kyc,'')) IN ('ACEITO','NAO_ACEITO')
-                  THEN k.data_analise::timestamp ELSE NULL END
+              CASE WHEN UPPER(TRIM(COALESCE(k.status_kyc,''))) IN ('ACEITO','NAO_ACEITO')
+                  THEN UPPER(TRIM(k.status_kyc)) ELSE NULL END,
+              k.motivo_decisao, NULL
             FROM public.fato_kyc k
             ON CONFLICT(categoria,origem_id) DO NOTHING
             """));
@@ -86,5 +87,6 @@ public class SincronizacaoOcorrenciasService {
     // A rotina se executa periodicamente; a integração não depende de carga única.
     @Scheduled(fixedDelayString = "${sgr.sincronizacao.intervalo-ms:60000}",
                initialDelayString = "${sgr.sincronizacao.inicio-ms:60000}")
-    public void executarAgendado() { atualizar(); }
+    @Transactional
+    public void executarAgendado() { if (sincronizacaoAutomatica) atualizar(); }
 }

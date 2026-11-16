@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RegraKycTest {
+ @Test void statusHistoricoNormalizadoPermaneceEncerrado(){assertTrue(RegraKyc.encerrada(" aprovado "));assertTrue(RegraKyc.encerrada(" reprovado "));assertFalse(RegraKyc.encerrada(null));}
  @Test void rf35_aceitoERecusadoValidos(){assertTrue(RegraKyc.decisaoValida("ACEITO"));assertTrue(RegraKyc.decisaoValida("NAO_ACEITO"));}
  @Test void rf35_naoAceitaOutraDecisao(){assertFalse(RegraKyc.decisaoValida("PROCEDENTE"));assertFalse(RegraKyc.decisaoValida(null));}
  @Test void rf35_analistaPodeAssumirSemResponsavel(){assertTrue(RegraKyc.podeDecidir("PENDENTE", null, 1));}

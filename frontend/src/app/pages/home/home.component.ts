@@ -1,22 +1,29 @@
-import {Component,OnInit} from '@angular/core';
+import {Component,OnDestroy,OnInit} from '@angular/core';
+import {Subscription} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 import {ApiService} from '../../core/api.service';
 import {RiskChartComponent} from './risk-chart.component';
 import {IndicadoresOcorrencias} from '../../core/models';
 import {periodoValido,selecoesCsv} from '../../core/filtros-risco';
 @Component({selector:'app-home',standalone:true,imports:[FormsModule,RiskChartComponent],templateUrl:'./home.component.html'})
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit,OnDestroy {
  carregando=true;erro='';dados:IndicadoresOcorrencias|null=null;
  inicio='';fim='';statusSelecionados:string[]=[];categoriasSelecionadas:string[]=[];
  produtosSelecionados:string[]=[];produtos:string[]=[];
  readonly categorias=['KYC','PLD','FRAUDE','CHARGEBACK'];
  readonly estados=['PENDENTE','EM_ANALISE','AGUARDANDO_PARECER','CONCLUIDA'];
+ private consulta?:Subscription;
+ private consultaProdutos?:Subscription;
+ private versao=0;
  constructor(private api:ApiService){}
- ngOnInit():void{this.api.produtos().subscribe({next:lista=>this.produtos=lista,error:()=>this.produtos=[]});this.carregar();}
- carregar():void{if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial deve ser anterior ou igual à final.';return;}
-  this.carregando=true;this.erro='';this.api.indicadoresOcorrencias({inicio:this.inicio,fim:this.fim,status:selecoesCsv(this.statusSelecionados),categoria:selecoesCsv(this.categoriasSelecionadas),produto:selecoesCsv(this.produtosSelecionados)}).subscribe({
-   next:d=>{this.dados=d;this.carregando=false;},
-   error:e=>{this.erro=e?.error?.detail||e?.error?.erro||'Não foi possível calcular os indicadores. Confira o banco e a migração 08.';this.carregando=false;}
+ ngOnInit():void{this.consultaProdutos=this.api.produtos().subscribe({next:lista=>this.produtos=lista,error:()=>this.produtos=[]});this.carregar();}
+ ngOnDestroy():void{this.versao++;this.consulta?.unsubscribe();this.consultaProdutos?.unsubscribe();}
+ carregar():void{
+  const versao=++this.versao;this.consulta?.unsubscribe();this.dados=null;this.carregando=false;
+  if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial deve ser anterior ou igual à final.';return;}
+  this.carregando=true;this.erro='';this.consulta=this.api.indicadoresOcorrencias({inicio:this.inicio,fim:this.fim,status:selecoesCsv(this.statusSelecionados),categoria:selecoesCsv(this.categoriasSelecionadas),produto:selecoesCsv(this.produtosSelecionados)}).subscribe({
+   next:d=>{if(versao===this.versao){this.dados=d;this.carregando=false;}},
+   error:e=>{if(versao===this.versao){this.erro=e?.error?.detail||e?.error?.erro||'Não foi possível consultar os indicadores. Tente novamente.';this.carregando=false;}}
   });}
  limpar():void{this.inicio='';this.fim='';this.statusSelecionados=[];this.categoriasSelecionadas=[];this.produtosSelecionados=[];this.carregar();}
  get categoriaItens(){return (this.dados?.porCategoria||[]).map(c=>({rotulo:c.categoria,valor:Number(c.total)}));}

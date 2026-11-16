@@ -17,13 +17,14 @@ export function exportarExcel(nome: string, linhas: (string | number | null | un
     ['xl/worksheets/sheet1.xml',sheet]
   ];
   const bytes = new TextEncoder(); const entradas: number[]=[]; const central: number[]=[];
+  const anexar=(destino:number[],dados:Uint8Array)=>{for(const byte of dados)destino.push(byte);};
   const u16=(a:number[],n:number)=>a.push(n&255,(n>>8)&255);
   const u32=(a:number[],n:number)=>a.push(n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255);
   const crc=(dados:Uint8Array):number=>{let n=0xffffffff;for(const c of dados){n^=c;for(let j=0;j<8;j++)n=(n>>>1)^((n&1)?0xedb88320:0);}return (n^0xffffffff)>>>0;};
   for(const [caminho,conteudo] of arquivos){
     const n=bytes.encode(caminho),d=bytes.encode(conteudo),offset=entradas.length,checksum=crc(d);
     u32(entradas,0x04034b50);u16(entradas,20);u16(entradas,0);u16(entradas,0);u16(entradas,0);u16(entradas,0);
-    u32(entradas,checksum);u32(entradas,d.length);u32(entradas,d.length);u16(entradas,n.length);u16(entradas,0);entradas.push(...n,...d);
+    u32(entradas,checksum);u32(entradas,d.length);u32(entradas,d.length);u16(entradas,n.length);u16(entradas,0);anexar(entradas,n);anexar(entradas,d);
     u32(central,0x02014b50);u16(central,20);u16(central,20);u16(central,0);u16(central,0);u16(central,0);u16(central,0);
     u32(central,checksum);u32(central,d.length);u32(central,d.length);u16(central,n.length);u16(central,0);u16(central,0);u16(central,0);u16(central,0);u32(central,0);u32(central,offset);central.push(...n);
   }

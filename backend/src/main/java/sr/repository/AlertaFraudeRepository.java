@@ -1,61 +1,42 @@
 package sr.repository;
 
 import sr.model.AlertaFraude;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public interface AlertaFraudeRepository
-        extends JpaRepository<AlertaFraude, String> {
+public interface AlertaFraudeRepository extends JpaRepository<AlertaFraude, String>, JpaSpecificationExecutor<AlertaFraude> {
+    List<AlertaFraude> findByClienteOrigem_IdClienteOrClienteDestino_IdClienteOrClienteVitima_IdClienteOrClienteSuspeito_IdCliente(
+        String idClienteOrigem, String idClienteDestino, String idClienteVitima, String idClienteSuspeito);
 
-    //busca alertas associados a um cliente
-    List<AlertaFraude>
-    findByClienteOrigem_IdClienteOrClienteDestino_IdClienteOrClienteVitima_IdClienteOrClienteSuspeito_IdCliente(
-            String idClienteOrigem,
-            String idClienteDestino,
-            String idClienteVitima,
-            String idClienteSuspeito
-    );
-
-    //filtra alertas por critérios
-    @Query("""
-        SELECT a
-        FROM AlertaFraude a
-        WHERE (:status IS NULL OR a.statusAnalise = :status)
-          AND (:severidade IS NULL OR a.severidade = :severidade)
-          AND (:tipoFraude IS NULL OR a.tipoFraude = :tipoFraude)
-          AND (:dataInicial IS NULL OR a.dataAlerta >= :dataInicial)
-          AND (:dataFinal IS NULL OR a.dataAlerta <= :dataFinal)
-          AND (
-              :busca IS NULL
-              OR LOWER(a.clienteOrigem.nomeRazaoSocial)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteOrigem.documentoFicticio)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteDestino.nomeRazaoSocial)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteDestino.documentoFicticio)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteVitima.nomeRazaoSocial)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteVitima.documentoFicticio)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteSuspeito.nomeRazaoSocial)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-              OR LOWER(a.clienteSuspeito.documentoFicticio)
-                    LIKE LOWER(CONCAT('%', :busca, '%'))
-          )
-        ORDER BY a.dataAlerta DESC
-        """)
-    List<AlertaFraude> filtrar(
-            @Param("status") String status,
-            @Param("severidade") String severidade,
-            @Param("tipoFraude") String tipoFraude,
-            @Param("dataInicial") LocalDateTime dataInicial,
-            @Param("dataFinal") LocalDateTime dataFinal,
-            @Param("busca") String busca
-    );
+    /** Adiciona apenas filtros informados, evitando parametros nulos sem tipo no PostgreSQL. */
+    default List<AlertaFraude> filtrar(String status, String severidade, String tipoFraude,
+            LocalDateTime dataInicial, LocalDateTime dataFinal, String busca) {
+        return findAll((root, query, cb) -> {
+            List<Predicate> filtros = new ArrayList<>();
+            if (status != null) filtros.add(cb.equal(root.get("statusAnalise"), status));
+            if (severidade != null) filtros.add(cb.equal(root.get("severidade"), severidade));
+            if (tipoFraude != null) filtros.add(cb.equal(root.get("tipoFraude"), tipoFraude));
+            if (dataInicial != null) filtros.add(cb.greaterThanOrEqualTo(root.get("dataAlerta"), dataInicial));
+            if (dataFinal != null) filtros.add(cb.lessThanOrEqualTo(root.get("dataAlerta"), dataFinal));
+            if (busca != null && !busca.isBlank()) {
+                String termo = "%" + busca.trim().toLowerCase(Locale.ROOT)
+                    .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+                List<Predicate> clientes = new ArrayList<>();
+                for (String papel : List.of("clienteOrigem", "clienteDestino", "clienteVitima", "clienteSuspeito")) {
+                    var cliente = root.join(papel, JoinType.LEFT);
+                    clientes.add(cb.like(cb.lower(cliente.get("nomeRazaoSocial")), termo, '\\'));
+                    clientes.add(cb.like(cb.lower(cliente.get("documentoFicticio")), termo, '\\'));
+                }
+                filtros.add(cb.or(clientes.toArray(Predicate[]::new)));
+            }
+            if (query != null) query.orderBy(cb.desc(root.get("dataAlerta")));
+            return cb.and(filtros.toArray(Predicate[]::new));
+        });
+    }
 }

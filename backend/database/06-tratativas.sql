@@ -26,17 +26,17 @@ CREATE INDEX IF NOT EXISTS idx_tratativa_evento_ocorrencia ON public.ocorrencia_
 -- Somente insere ocorrências de origem ainda não integradas (idempotente).
 INSERT INTO public.ocorrencia_tratativa(categoria,origem_id,status,cliente_id,data_ocorrencia,valor,risco)
 SELECT 'PLD',p.id_alerta_pld,
- CASE WHEN UPPER(COALESCE(p.status_analise,'')) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
+ CASE WHEN UPPER(TRIM(COALESCE(p.status_analise,''))) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
  p.id_cliente_analisado,p.data_alerta,p.valor_relacionado,p.severidade
 FROM public.fato_alerta_pld p ON CONFLICT(categoria,origem_id) DO NOTHING;
 INSERT INTO public.ocorrencia_tratativa(categoria,origem_id,status,cliente_id,data_ocorrencia,valor,risco)
 SELECT 'FRAUDE',f.id_alerta_fraude,
- CASE WHEN UPPER(COALESCE(f.status_analise,'')) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
+ CASE WHEN UPPER(TRIM(COALESCE(f.status_analise,''))) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
  f.id_cliente_origem,f.data_alerta,f.valor_exposto,f.severidade
 FROM public.fato_alerta_fraude f ON CONFLICT(categoria,origem_id) DO NOTHING;
 INSERT INTO public.ocorrencia_tratativa(categoria,origem_id,status,cliente_id,data_ocorrencia,valor)
 SELECT 'CHARGEBACK',c.id_chargeback,
- CASE WHEN UPPER(COALESCE(c.status_chargeback,'')) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','RESOLVIDO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
+ CASE WHEN UPPER(TRIM(COALESCE(c.status_chargeback,''))) IN ('CONCLUIDA','CONCLUIDO','CONCLUÍDA','FINALIZADO','ENCERRADO','FECHADO','RESOLVIDO') THEN 'CONCLUIDA' ELSE 'PENDENTE' END,
  c.id_cliente,c.data_transacao,c.valor_contestado
 FROM public.fato_chargeback c ON CONFLICT(categoria,origem_id) DO NOTHING;
 -- Preencher produto/tipo de operação a partir da transação vinculada (não sobrescreve informação existente).
