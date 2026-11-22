@@ -7,7 +7,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test:unit": "node node_modules/typescript/bin/tsc --module commonjs --target es2020 --skipLibCheck --outDir .unit-test src/app/core/filtros-risco.ts src/app/core/permissions.ts && node --test --test-isolation=none tests/filtros.test.cjs tests/casos.test.cjs tests/exportacoes.test.cjs",
+    "test:unit": "node node_modules/typescript/bin/tsc --module commonjs --target es2020 --skipLibCheck --outDir .unit-test src/app/core/filtros-risco.ts src/app/core/permissions.ts src/app/core/paginacao.ts && node --test --test-isolation=none tests/filtros.test.cjs tests/casos.test.cjs tests/exportacoes.test.cjs tests/paginacao.test.cjs",
     "typecheck": "ngc -p tsconfig.app.json --noEmit"
   },
   "dependencies": {

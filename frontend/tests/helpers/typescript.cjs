@@ -19,7 +19,13 @@ function ambiente() {
     }).outputText;
     const localRequire = id => {
       if (id.startsWith('.')) return load(path.resolve(path.dirname(file), id+'.ts'));
-      if (id === '@angular/core') return {Component:()=>c=>c,Injectable:()=>c=>c,Input:()=>()=>{}};
+      if (id === '@angular/core') return {
+        Component:()=>c=>c,
+        Injectable:()=>c=>c,
+        Input:()=>()=>{},
+        Output:()=>()=>{},
+        EventEmitter:class{emit(){}}
+      };
       if (id === '@angular/common') return {DatePipe:class{},CurrencyPipe:class{},CommonModule:class{}};
       if (id === '@angular/forms') return {FormsModule:class{}};
       if (id === '@angular/router' || id === '@angular/common/http') return {};

@@ -7,10 +7,13 @@ import {Tratativa} from '../../core/models';
 import {exportarExcel} from '../../core/exportar-excel';
 import {exportarPdf} from '../../core/exportar-pdf';
 import {periodoValido} from '../../core/filtros-risco';
-@Component({selector:'app-relatorios',standalone:true,imports:[FormsModule,CurrencyPipe,DatePipe],templateUrl:'./relatorios.component.html'})
+import {paginar} from '../../core/paginacao';
+import {PaginacaoComponent} from '../../shared/paginacao.component';
+@Component({selector:'app-relatorios',standalone:true,imports:[FormsModule,CurrencyPipe,DatePipe,PaginacaoComponent],templateUrl:'./relatorios.component.html'})
 export class RelatoriosComponent implements OnInit,OnDestroy {
  dados:Tratativa[]=[];erro='';carregando=true;
  inicio='';fim='';categoria='';status='';produto='';decisao='';busca='';produtos:string[]=[];
+ pagina=1;itensPorPagina=10;
  private consulta?:Subscription;
  private consultaProdutos?:Subscription;
  private versao=0;
@@ -19,13 +22,14 @@ export class RelatoriosComponent implements OnInit,OnDestroy {
  ngOnInit():void{this.consultaProdutos=this.api.produtos().subscribe({next:lista=>this.produtos=lista,error:()=>this.produtos=[]});this.carregar();}
  ngOnDestroy():void{this.versao++;this.consulta?.unsubscribe();this.consultaProdutos?.unsubscribe();}
  carregar():void{
-  const versao=++this.versao;this.consulta?.unsubscribe();this.dados=[];this.carregando=false;
+  this.pagina=1;const versao=++this.versao;this.consulta?.unsubscribe();this.dados=[];this.carregando=false;
   if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial deve ser menor ou igual à final.';return;}
   this.carregando=true;this.erro='';this.consulta=this.api.tratativas({visao:'TODAS',inicio:this.inicio,fim:this.fim,categoria:this.categoria,status:this.status,produto:this.produto,decisao:this.decisao,responsavel:this.busca}).subscribe({
     next:d=>{if(versao===this.versao){this.dados=d;this.carregando=false;}},error:e=>{if(versao===this.versao){this.carregando=false;this.erro=e?.error?.detail||e?.error?.erro||'Falha ao consultar relatório.';}}
   });}
  limpar():void{this.inicio='';this.fim='';this.categoria='';this.status='';this.produto='';this.decisao='';this.busca='';this.carregar();}
  get filtrados(){return this.dados;}
+ get paginados(){return paginar(this.filtrados,this.pagina,this.itensPorPagina);}
  get total(){return this.dados.length;}
  get concluidas(){return this.dados.filter(o=>o.status==='CONCLUIDA').length;}
  get abertas(){return this.total-this.concluidas;}

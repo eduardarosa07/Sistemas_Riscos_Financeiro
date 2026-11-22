@@ -71,7 +71,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (cliente of filtrados; track cliente.idCliente) {
+          @for (cliente of paginados; track cliente.idCliente) {
             <tr (click)="abrir(cliente)">
               <td><strong>{{ cliente.idCliente }}</strong></td>
               <td>{{ cliente.nomeRazaoSocial }}</td>
@@ -94,5 +94,10 @@
         </tbody>
       </table>
     </div>
+    <app-paginacao
+      [total]="filtrados.length"
+      [(pagina)]="pagina"
+      [(porPagina)]="itensPorPagina"
+    />
   }
 </div>

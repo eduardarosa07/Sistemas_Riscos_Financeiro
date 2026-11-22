@@ -1,48 +1,111 @@
-# Arquitetura — Sistemas Riscos Financeiros
+# Arquitetura do SGR
 
-## Stack
-- Frontend web: Angular (porta 4200 em desenvolvimento)
-- Backend: Java + Spring Boot (porta 8080)
-- Persistência: Spring Data JPA / Hibernate
-- Banco: PostgreSQL `sistema_riscos`
-- pgAdmin: somente administração do PostgreSQL
+## Visao geral
+
+O Sistema de Gerenciamento de Riscos Financeiros e composto por tres processos
+separados:
+
+```text
+Angular (localhost:4200)
+        |
+        | HTTP/JSON, sessao e CSRF
+        v
+Spring Boot REST (localhost:8080)
+        |
+        | JPA e JDBC
+        v
+PostgreSQL - sistema_riscos (localhost:5432)
+```
+
+O Angular nunca acessa o PostgreSQL diretamente. O backend nao entrega a
+interface web: a porta 8080 identifica a API e a porta 4200 entrega o frontend.
+
+## Responsabilidades
+
+### Frontend Angular
+
+- autenticar o usuario por meio da API;
+- apresentar dashboard, clientes, KYC, PLD, fraude e chargeback;
+- apresentar fila, contexto e historico de ocorrencias;
+- aplicar permissoes visuais conforme o perfil;
+- gerar os arquivos PDF e Excel disponibilizados na interface.
+
+### Backend Spring Boot
+
+- expor endpoints REST em `/api/**`;
+- validar sessao, perfil e token CSRF;
+- consultar os dados financeiros no PostgreSQL;
+- calcular agregacoes gerenciais sem recalcular risco de cliente;
+- persistir apenas dados pertencentes ao SGR;
+- devolver respostas JSON para o Angular.
+
+### PostgreSQL
+
+- armazenar as tabelas externas consultadas pelo SGR;
+- armazenar usuarios, auditoria, tratativas e historicos do proprio sistema;
+- aplicar as restricoes e relacionamentos existentes no schema preparado.
+
+## Origem e propriedade dos dados
+
+Clientes, contas, transacoes, KYC, PLD, fraude, chargeback, scores e niveis de
+risco sao fornecidos por uma origem externa. O SGR apenas consulta e apresenta
+esses dados. Ele nao cadastra clientes e nao gera, recalcula ou reclassifica
+scores e niveis de risco.
+
+Quando a origem nao fornece risco ou score, a ausencia deve permanecer visivel,
+sem ser convertida em zero ou em uma classificacao inventada. Contagens e somas
+de registros existentes para o dashboard nao constituem calculo de risco.
+
+O SGR pode gravar apenas seus dados operacionais:
+
+- usuarios e versao de sessao;
+- auditoria administrativa;
+- responsabilidade, decisao e justificativa de tratativas;
+- historico de eventos das ocorrencias.
 
 ## Camadas do backend
-`Controller -> DTO -> Service -> Repository -> Model/Entity -> PostgreSQL`
 
-O Angular nunca acessa o PostgreSQL diretamente. Ele consome `/api/**` em JSON.
+O fluxo preferencial e:
 
-## Origem dos dados de clientes e risco
+```text
+Controller -> DTO -> Service -> Repository/JdbcTemplate -> PostgreSQL
+```
 
-Diretriz confirmada pelo responsável pelo projeto em 15/11/2026: os dados de
-clientes, scores e níveis de risco são fornecidos por uma fonte externa. O SGR
-apenas consulta esses dados e os exibe na interface, por meio da API e das tabelas
-de origem. Não cabe ao SGR cadastrar clientes nem gerar, calcular ou reclassificar
-seus scores e níveis de risco, seja no frontend, no backend ou no banco de dados.
+- `controller`: contratos HTTP e validacao de entrada;
+- `dto`: objetos enviados e recebidos pela API;
+- `service`: consultas, regras e transacoes;
+- `repository`: acesso JPA;
+- `model`: entidades persistidas;
+- `config`: CORS, sessao, autorizacao e CSRF;
+- `exception`: padronizacao de falhas da API.
 
-Quando o risco ou score não for informado pela fonte, a interface deve sinalizar
-a ausência do dado, sem inventar uma classificação ou transformar a ausência em
-score zero. Contagens e somas gerenciais de registros existentes não constituem
-cálculo de risco. Os registros operacionais de usuários e tratativas permanecem
-no escopo existente; essa diretriz não autoriza novas alterações nos dados de
-origem dos clientes.
+Consultas agregadas que exigem SQL especifico permanecem na camada de servico e
+usam `JdbcTemplate`, evitando SQL diretamente nos componentes Angular.
 
-## Usuários e segurança
-A tabela `usuario` contém nome, email, `senha_hash`, perfil e status.
-A senha original nunca é gravada no banco. O backend usa BCrypt.
-As respostas da API usam `UsuarioResponse`, que não contém o hash.
-O email é único e normalizado em minúsculas.
-Perfis ficam como texto por enquanto, permitindo definir os perfis posteriormente.
-O status é restrito no banco a `ATIVO` ou `INATIVO`.
+## Autenticacao e autorizacao
 
-Não existe administrador/senha padrão no código. Para criar o primeiro administrador
-automaticamente em ambiente local, defina `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD`
-antes de iniciar o backend.
+- login por e-mail e senha protegida com BCrypt;
+- sessao HTTP com cookie `HttpOnly` e `SameSite=Lax`;
+- token CSRF nas operacoes de escrita;
+- perfis `USUARIO`, `ANALISTA`, `GESTOR` e `ADMINISTRADOR`;
+- revalidacao do status e da versao da sessao;
+- administracao de usuarios restrita ao perfil autorizado;
+- limite local de tentativas de login mantido em memoria.
 
-## Banco existente
-`spring.jpa.hibernate.ddl-auto=validate`: o Hibernate valida os Models contra as
-tabelas existentes e não cria/altera silenciosamente o schema.
+## Inicializacao segura
 
-Antes de iniciar esta versão, execute:
-`backend/database/02-criar-tabela-usuario.sql`
-no banco `sistema_riscos`.
+O Hibernate usa `ddl-auto=validate`. A aplicacao valida o schema existente e nao
+cria nem altera tabelas durante a inicializacao. A sincronizacao automatica fica
+desabilitada por padrao e as credenciais sao recebidas por variaveis de ambiente.
+
+Os SQLs em `backend/database` sao historicos e manuais. Eles nao sao executados
+pelo build nem pela aplicacao e nao devem ser aplicados na base da apresentacao.
+O schema versionado ainda precisa ser consolidado antes de ser usado para criar
+um banco novo.
+
+## Execucao e verificacao
+
+- preparacao da demonstracao: `docs/GUIA_APRESENTACAO.md`;
+- validacao consolidada: `docs/VALIDACAO_ATUAL.md`;
+- catalogo oficial: `docs/MATRIZ_86_REQUISITOS.csv`;
+- rastreabilidade: `docs/RASTREABILIDADE_86.md`.

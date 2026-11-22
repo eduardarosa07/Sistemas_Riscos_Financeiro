@@ -42,8 +42,8 @@ $env:SGR_SINCRONIZACAO_AUTOMATICA = 'false'
 Defina `DB_PASSWORD` de forma segura no ambiente antes de iniciar. O script
 `scripts/iniciar_apresentacao.ps1` da raiz solicita a senha de forma oculta.
 
-A API fica disponivel em `http://localhost:8080`. O status publico pode ser
-consultado em `http://localhost:8080/api/status`.
+A API fica disponivel em `http://localhost:8080`. A raiz identifica o servico e
+o status publico pode ser consultado em `http://localhost:8080/api/status`.
 
 A interface e executada separadamente pelo Angular na porta 4200.
 
@@ -66,3 +66,13 @@ Spring ou acessam PostgreSQL sao opt-in por variavel de ambiente.
 
 Para a apresentacao, use preferencialmente o script da raiz:
 `scripts/iniciar_apresentacao.ps1`.
+
+## SQLs versionados
+
+Os arquivos em `backend/database` registram etapas manuais anteriores e nao sao
+executados pelo Maven, pelo Spring Boot ou pelos scripts de apresentacao. Eles
+nao devem ser aplicados na base real da demonstracao.
+
+O schema SQL ainda precisa ser consolidado antes de ser usado para preparar um
+banco novo. Ate essa consolidacao, a referencia executavel e o schema local ja
+preparado e validado pelo Hibernate com `ddl-auto=validate`.

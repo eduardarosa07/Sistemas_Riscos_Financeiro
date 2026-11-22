@@ -7,14 +7,17 @@ import {ApiService} from '../../core/api.service';
 import {AuthService} from '../../core/auth.service';
 import {Tratativa, TratativaEvento, ContextoTratativa} from '../../core/models';
 import {periodoValido} from '../../core/filtros-risco';
+import {paginar} from '../../core/paginacao';
+import {PaginacaoComponent} from '../../shared/paginacao.component';
 
-@Component({selector:'app-ocorrencias',standalone:true,imports:[FormsModule,DatePipe],templateUrl:'./ocorrencias.component.html'})
+@Component({selector:'app-ocorrencias',standalone:true,imports:[FormsModule,DatePipe,PaginacaoComponent],templateUrl:'./ocorrencias.component.html'})
 export class OcorrenciasComponent implements OnInit, OnDestroy {
   todas:Tratativa[]=[]; selecionada:Tratativa|null=null; historico:TratativaEvento[]=[];
   contexto:ContextoTratativa|null=null;
   visao:'FILA'|'HISTORICO'='FILA'; carregando=true; executando=false; erro=''; aviso='';
   erroHistorico=''; erroContexto=''; carregandoHistorico=false;
   categoria=''; status=''; inicio=''; fim=''; busca=''; justificativa=''; decisao='PROCEDENTE';
+  pagina=1; itensPorPagina=10;
   private listaRequest?:Subscription;
   private historicoRequest?:Subscription;
   private contextoRequest?:Subscription;
@@ -40,10 +43,12 @@ export class OcorrenciasComponent implements OnInit, OnDestroy {
   }
   get analista(){return this.auth.usuario()?.perfil==='ANALISTA';}
   get filtradas(){const q=this.busca.trim().toLowerCase();return this.todas.filter(o=>!q||o.origemId.toLowerCase().includes(q)||String(o.id).includes(q)||String(o.clienteId||'').toLowerCase().includes(q));}
+  get paginadas(){return paginar(this.filtradas,this.pagina,this.itensPorPagina);}
   limpar():void {this.categoria='';this.status='';this.inicio='';this.fim='';this.busca='';this.carregar();}
   carregar(limparErro=true):void {
     if(this.destruido)return;
     if(!periodoValido(this.inicio,this.fim)){this.erro='Data inicial não pode ser posterior à data final.';return;}
+    this.pagina=1;
     const versao=++this.versaoLista;
     this.listaRequest?.unsubscribe();
     this.carregando=true; if(limparErro)this.erro=''; this.todas=[];

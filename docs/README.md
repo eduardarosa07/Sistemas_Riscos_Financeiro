@@ -1,15 +1,18 @@
 # Documentacao do SGR
 
-## Documentos atuais
+Esta pasta contem somente a documentacao necessaria para compreender, validar e
+apresentar a versao atual do sistema.
 
-- [Guia da apresentacao](GUIA_APRESENTACAO_2026-11-23.md)
-- [Matriz dos 86 requisitos](MATRIZ_86_REQUISITOS.csv)
-- [Rastreabilidade dos requisitos](RASTREABILIDADE_86.md)
-- [Correcoes prioritarias](CORRECOES_PRIORITARIAS_2026-11-15.md)
-- [Validacao frontend e PostgreSQL](VALIDACAO_FRONT_POSTGRES_2026-11-15.md)
+## Documentos
 
-## Documentos historicos
+- [Guia da apresentacao](GUIA_APRESENTACAO.md): inicializacao segura, roteiro e
+  massa previamente conferida.
+- [Validacao atual](VALIDACAO_ATUAL.md): resultados executados, limites e
+  pendencias conhecidas.
+- [Rastreabilidade](RASTREABILIDADE_86.md): criterio de leitura e comprovacao dos
+  requisitos.
+- [Matriz dos 86 requisitos](MATRIZ_86_REQUISITOS.csv): catalogo oficial dos IDs
+  recebidos no projeto.
 
-Os demais relatorios e logs permanecem no repositorio como evidencia de
-etapas anteriores. Suas conclusoes podem ter sido superadas pelos documentos
-atuais e nao devem ser usadas isoladamente para descrever o estado final.
+Resultados de etapas anteriores foram consolidados em `VALIDACAO_ATUAL.md`. O
+historico detalhado de arquivos removidos permanece disponivel no Git.

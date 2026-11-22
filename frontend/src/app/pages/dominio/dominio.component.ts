@@ -6,12 +6,14 @@ import { map, Observable, of, Subscription } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { OcorrenciaView, TratativaEvento } from '../../core/models';
+import { paginar } from '../../core/paginacao';
 import {
   classeRisco,
   kycEncerrado,
   labelStatus,
   ocorrenciasDe
 } from '../../core/risco.utils';
+import { PaginacaoComponent } from '../../shared/paginacao.component';
 
 type VisaoKyc = 'PENDENTES' | 'HISTORICO';
 type DecisaoKyc = 'ACEITO' | 'NAO_ACEITO';
@@ -19,7 +21,7 @@ type DecisaoKyc = 'ACEITO' | 'NAO_ACEITO';
 @Component({
   selector: 'app-dominio',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, DatePipe],
+  imports: [FormsModule, CurrencyPipe, DatePipe, PaginacaoComponent],
   templateUrl: './dominio.component.html'
 })
 export class DominioComponent implements OnInit, OnDestroy {
@@ -30,6 +32,8 @@ export class DominioComponent implements OnInit, OnDestroy {
   status = 'TODOS';
   risco = 'TODOS';
   aplicados = { busca: '', status: 'TODOS', risco: 'TODOS' };
+  pagina = 1;
+  itensPorPagina = 10;
 
   carregando = true;
   erro = '';
@@ -108,6 +112,7 @@ export class DominioComponent implements OnInit, OnDestroy {
   carregar(): void {
     if (this.salvando || this.destruido) return;
 
+    this.pagina = 1;
     const versao = ++this.versaoDados;
     this.dadosRequest?.unsubscribe();
     this.carregando = true;
@@ -144,6 +149,7 @@ export class DominioComponent implements OnInit, OnDestroy {
   }
 
   filtrar(): void {
+    this.pagina = 1;
     this.aplicados = {
       busca: this.busca,
       status: this.status,
@@ -167,6 +173,10 @@ export class DominioComponent implements OnInit, OnDestroy {
         (this.aplicados.risco === 'TODOS' ||
           (ocorrencia.risco ?? '').toUpperCase().includes(this.aplicados.risco))
     );
+  }
+
+  get paginados(): OcorrenciaView[] {
+    return paginar(this.filtrados, this.pagina, this.itensPorPagina);
   }
 
   limpar(): void {

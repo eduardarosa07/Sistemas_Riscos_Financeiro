@@ -25,6 +25,7 @@ meio da API. O Angular apenas consulta e apresenta esses valores.
 - consulta e detalhe consolidado de clientes;
 - consultas de KYC, PLD, fraude e chargeback;
 - fila, contexto e histórico de ocorrências;
+- paginação padronizada em 10, 50 ou 100 registros nas listas operacionais;
 - tratativas operacionais autorizadas por perfil;
 - relatórios com exportação PDF e Excel;
 - gestão de usuários para administradores.

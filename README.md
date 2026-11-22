@@ -58,7 +58,7 @@ Ao terminar a demonstracao:
 ```
 
 Consulte o roteiro completo em
-[`docs/GUIA_APRESENTACAO_2026-11-23.md`](docs/GUIA_APRESENTACAO_2026-11-23.md).
+[`docs/GUIA_APRESENTACAO.md`](docs/GUIA_APRESENTACAO.md).
 
 ## Execucao manual
 
@@ -100,9 +100,12 @@ arquivos ZIP locais no pacote de entrega.
 ## Validacao
 
 ```powershell
-.\scripts\validar_local.ps1
+.\scripts\validar_codigo.ps1
 ```
 
 Testes de integracao PostgreSQL sao opt-in e devem ser executados somente em
 ambiente controlado. A matriz oficial esta em
 [`docs/MATRIZ_86_REQUISITOS.csv`](docs/MATRIZ_86_REQUISITOS.csv).
+
+O resultado consolidado das verificacoes realizadas esta em
+[`docs/VALIDACAO_ATUAL.md`](docs/VALIDACAO_ATUAL.md).

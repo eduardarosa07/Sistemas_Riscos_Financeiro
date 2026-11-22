@@ -91,7 +91,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (ocorrencia of filtrados; track ocorrencia.id) {
+          @for (ocorrencia of paginados; track ocorrencia.id) {
             <tr>
               <td><strong>#{{ ocorrencia.id }}</strong></td>
               <td>{{ ocorrencia.clienteNome }}</td>
@@ -121,6 +121,11 @@
         </tbody>
       </table>
     </div>
+    <app-paginacao
+      [total]="filtrados.length"
+      [(pagina)]="pagina"
+      [(porPagina)]="itensPorPagina"
+    />
   }
 </div>
 
