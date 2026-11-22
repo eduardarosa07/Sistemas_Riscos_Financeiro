@@ -4,11 +4,12 @@ import sr.dto.ClienteHistoricoDTO;
 import sr.exception.RecursoNaoEncontradoException;
 import sr.model.*;
 import sr.repository.*;
-import sr.exception.ClienteDuplicadoException;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ClienteService {
@@ -21,6 +22,7 @@ public class ClienteService {
     private final AlertaPldRepository alertaPldRepository;
     private final ChargebackRepository chargebackRepository;
     private final RiscoClienteRepository riscoClienteRepository;
+    private final JdbcTemplate jdbc;
 
     public ClienteService(
             ClienteRepository clienteRepository,
@@ -30,7 +32,8 @@ public class ClienteService {
             AlertaFraudeRepository alertaFraudeRepository,
             AlertaPldRepository alertaPldRepository,
             ChargebackRepository chargebackRepository,
-            RiscoClienteRepository riscoClienteRepository) {
+            RiscoClienteRepository riscoClienteRepository,
+            JdbcTemplate jdbc) {
 
         this.clienteRepository = clienteRepository;
         this.contaRepository = contaRepository;
@@ -40,6 +43,27 @@ public class ClienteService {
         this.alertaPldRepository = alertaPldRepository;
         this.chargebackRepository = chargebackRepository;
         this.riscoClienteRepository = riscoClienteRepository;
+        this.jdbc = jdbc;
+    }
+
+    /**
+     * Consulta a visão consolidada sem criar ou recalcular o risco do cliente.
+     * Score, nível e contadores são lidos diretamente da fonte externa.
+     */
+    public List<Map<String, Object>> listarComRisco() {
+        return jdbc.queryForList("""
+            SELECT c.id_cliente AS "idCliente",c.tipo_pessoa AS "tipoPessoa",
+             c.nome_razao_social AS "nomeRazaoSocial",c.documento_ficticio AS "documentoFicticio",
+             c.status_cliente AS "statusCliente",c.cidade,c.uf,
+             COALESCE(r.nivel_risco,'NÃO CLASSIFICADO') AS "riscoGeral",
+             r.score_risco_geral AS "scoreRiscoGeral",
+             COALESCE(r.qtd_alertas_fraude,0) AS "qtdAlertasFraude",
+             COALESCE(r.qtd_alertas_pld,0) AS "qtdAlertasPld",
+             COALESCE(r.qtd_chargebacks,0) AS "qtdChargebacks"
+            FROM public.dim_cliente c
+            LEFT JOIN public.fato_risco_cliente r ON r.id_cliente=c.id_cliente
+            ORDER BY c.nome_razao_social,c.id_cliente
+            """);
     }
 
     public List<Cliente> listarTodos() {
@@ -53,28 +77,6 @@ public class ClienteService {
                                 "Cliente não encontrado: " + id
                         )
                 );
-    }
-
-    public Cliente salvar(Cliente objeto) {
-
-    if (clienteRepository.existsById(objeto.getIdCliente())) {
-        throw new ClienteDuplicadoException(
-                "Já existe um cliente cadastrado com o ID: "
-                        + objeto.getIdCliente()
-        );
-    }
-
-    return clienteRepository.save(objeto);
-}
-    public Cliente atualizar(String id, Cliente objeto) {
-        buscarPorId(id);
-        objeto.setIdCliente(id);
-        return clienteRepository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        Cliente existente = buscarPorId(id);
-        clienteRepository.delete(existente);
     }
 
     public ClienteHistoricoDTO buscarHistorico(String idCliente) {

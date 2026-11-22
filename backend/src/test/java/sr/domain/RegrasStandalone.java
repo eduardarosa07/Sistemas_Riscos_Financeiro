@@ -20,8 +20,6 @@ public final class RegrasStandalone {
     check(RegraKyc.decisaoValida("ACEITO"),"KYC aceito");
     check(RegraKyc.decisaoValida("NAO_ACEITO"),"KYC recusado");
     check(!RegraKyc.decisaoValida("PROCEDENTE"),"KYC apenas duas decisões");
-    check(RegraKyc.deveInativar("NAO_ACEITO"),"Recusa inativa");
-    check(!RegraKyc.deveInativar("ACEITO"),"Aceite não inativa");
     check(!RegraKyc.podeDecidir("ACEITO",null,1L),"Não redecidir KYC concluído");
     check(!RegraKyc.podeDecidir("PENDENTE",2L,1L),"Não decidir KYC de outro");
     check(RegraKyc.parecerValido("Evidências registradas"),"Parecer KYC");

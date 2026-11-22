@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SincronizacaoOcorrenciasService {
     private final JdbcTemplate jdbc;
-    @Value("${sgr.sincronizacao.automatica:true}")
-    private boolean sincronizacaoAutomatica = true;
+    @Value("${sgr.sincronizacao.automatica:false}")
+    private boolean sincronizacaoAutomatica = false;
     public SincronizacaoOcorrenciasService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
     @Transactional

@@ -2,9 +2,6 @@ package sr.controller;
 
 import sr.model.Transacao;
 import sr.service.TransacaoService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,19 +26,4 @@ public class TransacaoController {
         return service.buscarPorId(id);
     }
 
-    @PostMapping
-    public ResponseEntity<Transacao> criar(@Valid @RequestBody Transacao objeto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(objeto));
-    }
-
-    @PutMapping("/{id}")
-    public Transacao atualizar(@PathVariable String id, @Valid @RequestBody Transacao objeto) {
-        return service.atualizar(id, objeto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable String id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
 }

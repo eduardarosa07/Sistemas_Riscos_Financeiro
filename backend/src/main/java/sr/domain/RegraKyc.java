@@ -11,8 +11,7 @@ import java.util.Objects;
  * 1. Validar as decisoes permitidas.
  * 2. Identificar analises ja encerradas.
  * 3. Controlar a responsabilidade do analista.
- * 4. Determinar quando inativar um cliente.
- * 5. Validar o parecer tecnico.
+ * 4. Validar o parecer tecnico.
  *
  * COMPATIBILIDADE COM DADOS HISTORICOS:
  *
@@ -102,26 +101,6 @@ public final class RegraKyc {
                 );
 
         return analiseDisponivel && analistaAutorizado;
-    }
-
-    /**
-     * Define quando o cliente deve ser inativado.
-     *
-     * Nas novas decisoes KYC:
-     *
-     * ACEITO:
-     * Nao altera automaticamente o status
-     * cadastral do cliente.
-     *
-     * NAO_ACEITO:
-     * Exige a inativacao do cliente.
-     *
-     * Esta regra nao modifica automaticamente
-     * registros historicos.
-     */
-    public static boolean deveInativar(String decisao) {
-
-        return "NAO_ACEITO".equals(decisao);
     }
 
     /**

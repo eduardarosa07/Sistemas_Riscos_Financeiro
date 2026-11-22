@@ -24,18 +24,4 @@ public class RegraRiscoService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("RegraRisco não encontrado: " + id));
     }
 
-    public RegraRisco salvar(RegraRisco objeto) {
-        return repository.save(objeto);
-    }
-
-    public RegraRisco atualizar(String id, RegraRisco objeto) {
-        buscarPorId(id);
-        objeto.setIdRegra(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        RegraRisco existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

@@ -144,3 +144,5 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 
 /* RF19: destaque discreto para o resumo mensal, preservando o tema original. */
 .sgr-kpi-destaque-mensal { border-top: 3px solid var(--primary, #1f65b5); }
+.sgr-panel-spaced { margin-top: 20px; }
+.sgr-contexto-cliente { margin-bottom: 14px; }

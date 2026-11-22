@@ -54,5 +54,10 @@
       }
     }
   },
-  "cli": { "analytics": false }
+  "cli": {
+    "analytics": false,
+    "cache": {
+      "enabled": false
+    }
+  }
 }

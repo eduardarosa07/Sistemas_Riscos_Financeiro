@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -80,31 +77,6 @@ public class KycController {
             """, id);
     }
 
-    @PostMapping
-    public ResponseEntity<Kyc> criar(
-            @Valid @RequestBody Kyc objeto) {
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(service.salvar(objeto));
-    }
-
-    @PutMapping("/{id}")
-    public Kyc atualizar(
-            @PathVariable String id,
-            @Valid @RequestBody Kyc objeto) {
-
-        return service.atualizar(id, objeto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(
-            @PathVariable String id) {
-
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
-
     /**
      * RF35 - Decisão KYC.
      *
@@ -112,9 +84,11 @@ public class KycController {
      * 1. Validação da análise e da sessão.
      * 2. Controle de concorrência.
      * 3. Registro da decisão e parecer.
-     * 4. Inativação do cliente, quando aplicável.
-     * 5. Conclusão da ocorrência.
-     * 6. Registro do histórico auditável.
+     * 4. Conclusão da ocorrência.
+     * 5. Registro do histórico auditável.
+     *
+     * O cadastro do cliente pertence à fonte externa e não é
+     * alterado por esta operação.
      */
     @PostMapping("/{id}/decisao")
     @Transactional
@@ -234,22 +208,6 @@ public class KycController {
             justificativa,
             id
         );
-
-        // Inativa o cliente quando a decisão exigir.
-        if (RegraKyc.deveInativar(decisao)) {
-
-            int atualizados = jdbc.update("""
-                UPDATE public.dim_cliente
-                SET status_cliente = 'INATIVO'
-                WHERE id_cliente = ?
-                """, k.get("id_cliente"));
-
-            if (atualizados != 1) {
-                throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cliente vinculado não encontrado");
-            }
-        }
 
         // Conclui a ocorrência e atribui o analista.
         jdbc.update("""

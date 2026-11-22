@@ -24,18 +24,4 @@ public class RiscoClienteService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("RiscoCliente não encontrado: " + id));
     }
 
-    public RiscoCliente salvar(RiscoCliente objeto) {
-        return repository.save(objeto);
-    }
-
-    public RiscoCliente atualizar(String id, RiscoCliente objeto) {
-        buscarPorId(id);
-        objeto.setIdCliente(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        RiscoCliente existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

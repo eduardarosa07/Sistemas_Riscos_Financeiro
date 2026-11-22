@@ -2,9 +2,6 @@ package sr.controller;
 
 import sr.model.Chargeback;
 import sr.service.ChargebackService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,19 +26,4 @@ public class ChargebackController {
         return service.buscarPorId(id);
     }
 
-    @PostMapping
-    public ResponseEntity<Chargeback> criar(@Valid @RequestBody Chargeback objeto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(objeto));
-    }
-
-    @PutMapping("/{id}")
-    public Chargeback atualizar(@PathVariable String id, @Valid @RequestBody Chargeback objeto) {
-        return service.atualizar(id, objeto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable String id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
 }

@@ -2,9 +2,6 @@ package sr.controller;
 
 import sr.model.Conta;
 import sr.service.ContaService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,19 +26,4 @@ public class ContaController {
         return service.buscarPorId(id);
     }
 
-    @PostMapping
-    public ResponseEntity<Conta> criar(@Valid @RequestBody Conta objeto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(objeto));
-    }
-
-    @PutMapping("/{id}")
-    public Conta atualizar(@PathVariable String id, @Valid @RequestBody Conta objeto) {
-        return service.atualizar(id, objeto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable String id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
 }

@@ -24,18 +24,4 @@ public class ChargebackService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Chargeback não encontrado: " + id));
     }
 
-    public Chargeback salvar(Chargeback objeto) {
-        return repository.save(objeto);
-    }
-
-    public Chargeback atualizar(String id, Chargeback objeto) {
-        buscarPorId(id);
-        objeto.setIdChargeback(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        Chargeback existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

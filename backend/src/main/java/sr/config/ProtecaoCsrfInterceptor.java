@@ -1,20 +1,69 @@
 package sr.config;
-import jakarta.servlet.http.*;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-import java.security.SecureRandom;
-import java.util.Base64;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-@Component public class ProtecaoCsrfInterceptor implements HandlerInterceptor {
- private static final SecureRandom RANDOM=new SecureRandom();
- public static String token(HttpSession s){String t=(String)s.getAttribute("csrfToken");
-  if(t==null){byte[] bytes=new byte[32];RANDOM.nextBytes(bytes);t=Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);s.setAttribute("csrfToken",t);}return t;}
- @Override public boolean preHandle(HttpServletRequest req,HttpServletResponse resp,Object handler){
-  String method=req.getMethod();if("GET".equals(method)||"HEAD".equals(method)||"OPTIONS".equals(method))return true;
-  HttpSession s=req.getSession(false);String sent=req.getHeader("X-CSRF-Token");
-  String expected=s==null?null:(String)s.getAttribute("csrfToken");
-  if(expected==null||sent==null||!MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),sent.getBytes(StandardCharsets.UTF_8))){resp.setStatus(403);return false;}
-  return true;
- }
+import java.security.SecureRandom;
+import java.util.Base64;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+@Component
+public class ProtecaoCsrfInterceptor implements HandlerInterceptor {
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    public static String token(HttpSession sessao) {
+        String token = (String) sessao.getAttribute("csrfToken");
+
+        if (token == null) {
+            byte[] bytes = new byte[32];
+            RANDOM.nextBytes(bytes);
+            token = Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(bytes);
+            sessao.setAttribute("csrfToken", token);
+        }
+
+        return token;
+    }
+
+    @Override
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler) {
+
+        String metodo = request.getMethod();
+        if ("GET".equals(metodo)
+                || "HEAD".equals(metodo)
+                || "OPTIONS".equals(metodo)) {
+            return true;
+        }
+
+        HttpSession sessao = request.getSession(false);
+        String enviado = request.getHeader("X-CSRF-Token");
+        String esperado = sessao == null
+            ? null
+            : (String) sessao.getAttribute("csrfToken");
+
+        if (esperado == null
+                || enviado == null
+                || !tokensIguais(esperado, enviado)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean tokensIguais(String esperado, String enviado) {
+        return MessageDigest.isEqual(
+            esperado.getBytes(StandardCharsets.UTF_8),
+            enviado.getBytes(StandardCharsets.UTF_8)
+        );
+    }
 }

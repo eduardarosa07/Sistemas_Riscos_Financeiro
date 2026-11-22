@@ -24,18 +24,4 @@ public class TransacaoService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Transacao não encontrado: " + id));
     }
 
-    public Transacao salvar(Transacao objeto) {
-        return repository.save(objeto);
-    }
-
-    public Transacao atualizar(String id, Transacao objeto) {
-        buscarPorId(id);
-        objeto.setIdTransacao(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        Transacao existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

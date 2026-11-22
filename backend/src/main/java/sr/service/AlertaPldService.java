@@ -24,18 +24,4 @@ public class AlertaPldService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("AlertaPld não encontrado: " + id));
     }
 
-    public AlertaPld salvar(AlertaPld objeto) {
-        return repository.save(objeto);
-    }
-
-    public AlertaPld atualizar(String id, AlertaPld objeto) {
-        buscarPorId(id);
-        objeto.setIdAlertaPld(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        AlertaPld existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

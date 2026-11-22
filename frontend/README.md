@@ -1,40 +1,72 @@
-# Frontend Angular — Sistemas Riscos Financeiros
+# Frontend Angular — Sistema de Gerenciamento de Riscos
 
-Frontend web separado do Spring Boot e alinhado às telas de referência do projeto.
+Interface web do SGR, executada separadamente do backend Spring Boot.
 
 ## Arquitetura
 
-`Angular -> HTTP/JSON -> Spring Boot (localhost:8080) -> JPA/Hibernate -> PostgreSQL`
+```text
+Angular (localhost:4200)
+    ↓ HTTP/JSON com sessão e CSRF
+Spring Boot (localhost:8080/api)
+    ↓ JPA/JDBC
+PostgreSQL
+```
 
-O frontend **não possui dados fictícios de fallback**. Se o backend estiver indisponível, a tela exibe erro e não inventa registros.
+O frontend não possui dados fictícios de fallback. Se a API estiver indisponível,
+as telas informam a falha sem inventar clientes, scores ou níveis de risco.
 
-## Telas incluídas
+Clientes, scores e classificações de risco são recebidos da fonte externa por
+meio da API. O Angular apenas consulta e apresenta esses valores.
 
-- Login
-- Home
-- Clientes
-- Visão consolidada do cliente
-- Ocorrências
-- PLD
-- Chargeback
-- KYC
-- Fraude
-- Relatórios
-- Usuários
+## Funcionalidades
 
-## Executar
+- autenticação por sessão;
+- dashboard e indicadores filtráveis;
+- consulta e detalhe consolidado de clientes;
+- consultas de KYC, PLD, fraude e chargeback;
+- fila, contexto e histórico de ocorrências;
+- tratativas operacionais autorizadas por perfil;
+- relatórios com exportação PDF e Excel;
+- gestão de usuários para administradores.
 
-1. Inicie PostgreSQL.
-2. Inicie o backend Spring Boot na porta `8080`.
-3. Nesta pasta:
-   - `npm install`
-   - `npm start`
-4. Abra `http://localhost:4200`.
+## Pré-requisitos
 
-O backend já está configurado para aceitar `http://localhost:4200` por CORS.
+- Node.js instalado;
+- dependências instaladas com `npm install` ou `npm ci`;
+- backend disponível em `http://localhost:8080`;
+- PostgreSQL e backend iniciados antes do Angular.
 
-## Observação
+## Executar localmente
 
-A Home e os Relatórios agregam dados usando os endpoints existentes enquanto o backend ainda não possui endpoints próprios de dashboard/relatórios. Todos os números continuam vindo do PostgreSQL por meio da API.
+No diretório `frontend`:
 
-A tela futura de tratativa de ocorrências ainda não grava decisões, pois a persistência/histórico da tratativa ainda precisa ser modelada no backend.
+```powershell
+npm install
+npm start
+```
+
+Abra `http://localhost:4200/login`.
+
+## Validar
+
+```powershell
+npm run test:unit
+npm run build
+```
+
+O teste unitário utiliza regras reais dos componentes e utilitários. O build de
+produção também valida TypeScript e templates Angular.
+
+## Diretórios gerados
+
+As pastas abaixo são locais, regeneráveis e não devem ser incluídas no Git ou no
+pacote de entrega:
+
+- `node_modules/` — dependências instaladas;
+- `.angular/` — cache persistente do compilador, desabilitado neste projeto;
+- `.unit-test/` — saída temporária dos testes;
+- `dist/` — bundle gerado.
+
+Elas não são funcionalidades do SGR e não armazenam dados de clientes. Esses
+diretórios também ficam ocultos no explorador do VS Code para manter visíveis
+somente os arquivos úteis durante a apresentação.

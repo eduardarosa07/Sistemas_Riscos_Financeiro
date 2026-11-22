@@ -24,18 +24,4 @@ public class ContaService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Conta não encontrada: " + id));
     }
 
-    public Conta salvar(Conta objeto) {
-        return repository.save(objeto);
-    }
-
-    public Conta atualizar(String id, Conta objeto) {
-        buscarPorId(id);
-        objeto.setIdConta(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        Conta existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

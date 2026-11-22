@@ -29,7 +29,7 @@ class AutorizacaoMvcTest {
     private final AuditoriaUsuarioService auditoria = mock(AuditoriaUsuarioService.class);
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
     private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
-        new ClienteController(clientes, jdbc), new ContaController(mock(ContaService.class)),
+        new ClienteController(clientes), new ContaController(mock(ContaService.class)),
         new TransacaoController(mock(TransacaoService.class)), new KycController(mock(KycService.class), jdbc),
         new AlertaPldController(mock(AlertaPldService.class)), new AlertaFraudeController(mock(AlertaFraudeService.class)),
         new ChargebackController(mock(ChargebackService.class)), new RegraRiscoController(mock(RegraRiscoService.class)),
@@ -57,14 +57,14 @@ class AutorizacaoMvcTest {
 
     @ParameterizedTest
     @MethodSource("escritas")
-    void escritaConsultivaBloqueadaMesmoComRotaEquivalente(String perfil, String rota) throws Exception {
+    void escritaConsultivaNaoPossuiRotaMesmoComUrlEquivalente(String perfil, String rota) throws Exception {
         MockHttpSession session = sessao(perfil);
         for (HttpMethod method : List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)) {
             String url = rota + (method == HttpMethod.POST ? "" : "/TESTE");
             mvc.perform(request(method, URI.create(url)).session(session)
                 .header("X-CSRF-Token", session.getAttribute("csrfToken"))
                 .contentType("application/json").content("{}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isMethodNotAllowed());
         }
         verifyNoInteractions(clientes, auditoria, jdbc);
     }

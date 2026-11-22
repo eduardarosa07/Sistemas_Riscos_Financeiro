@@ -43,18 +43,4 @@ public class AlertaFraudeService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("AlertaFraude não encontrado: " + id));
     }
 
-    public AlertaFraude salvar(AlertaFraude objeto) {
-        return repository.save(objeto);
-    }
-
-    public AlertaFraude atualizar(String id, AlertaFraude objeto) {
-        buscarPorId(id);
-        objeto.setIdAlertaFraude(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        AlertaFraude existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }

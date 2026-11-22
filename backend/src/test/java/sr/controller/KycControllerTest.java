@@ -90,7 +90,7 @@ class KycControllerTest {
      *
      * 1. Identifica o analista autenticado.
      * 2. Registra decisao e parecer.
-     * 3. Inativa o cliente recusado.
+     * 3. Preserva o cadastro externo do cliente.
      * 4. Conclui a ocorrencia.
      * 5. Registra o historico auditavel.
      *
@@ -98,7 +98,7 @@ class KycControllerTest {
      * public.ocorrencia_historico
      */
     @Test
-    void rf35_deveRegistrarResponsavelEInativarClienteRecusado() {
+    void rf35_deveRegistrarResponsavelSemAlterarClienteExterno() {
 
         // --------------------------------------
         // 1. SIMULAR O ANALISTA AUTENTICADO
@@ -168,35 +168,14 @@ class KycControllerTest {
          */
 
         // --------------------------------------
-        // 4. SIMULAR A INATIVACAO DO CLIENTE
-        // --------------------------------------
-
-        /*
-         * doReturn evita o problema de stubbing
-         * identificado anteriormente.
-         *
-         * lenient permite que outros comandos
-         * jdbc.update sejam executados no teste.
-         */
-        lenient().doReturn(1).when(jdbc).update(
-                argThat(sql ->
-                        sql.contains("UPDATE public.dim_cliente")
-                        && sql.contains(
-                                "status_cliente = 'INATIVO'"
-                        )
-                ),
-                eq("CLI001")
-        );
-
-        // --------------------------------------
-        // 5. SIMULAR O RETORNO DO SERVICO
+        // 4. SIMULAR O RETORNO DO SERVICO
         // --------------------------------------
 
         when(service.buscarPorId("KYC001"))
                 .thenReturn(new Kyc());
 
         // --------------------------------------
-        // 6. EXECUTAR A DECISAO
+        // 5. EXECUTAR A DECISAO
         // --------------------------------------
 
         Kyc resultado = controller.decidir(
@@ -212,7 +191,7 @@ class KycControllerTest {
         assertNotNull(resultado);
 
         // --------------------------------------
-        // 7. VALIDAR A DECISAO KYC
+        // 6. VALIDAR A DECISAO KYC
         // --------------------------------------
 
         verify(jdbc).update(
@@ -227,21 +206,16 @@ class KycControllerTest {
         );
 
         // --------------------------------------
-        // 8. VALIDAR A INATIVACAO DO CLIENTE
+        // 7. VALIDAR QUE O CLIENTE EXTERNO NAO E ALTERADO
         // --------------------------------------
 
-        verify(jdbc).update(
-                argThat(sql ->
-                        sql.contains("UPDATE public.dim_cliente")
-                        && sql.contains(
-                                "status_cliente = 'INATIVO'"
-                        )
-                ),
-                eq("CLI001")
+        verify(jdbc, never()).update(
+                argThat(sql -> sql.contains("public.dim_cliente")),
+                any(Object[].class)
         );
 
         // --------------------------------------
-        // 9. VALIDAR A CONCLUSAO DA OCORRENCIA
+        // 8. VALIDAR A CONCLUSAO DA OCORRENCIA
         // --------------------------------------
 
         verify(jdbc).update(
@@ -263,7 +237,7 @@ class KycControllerTest {
         );
 
         // --------------------------------------
-        // 10. VALIDAR O HISTORICO
+        // 9. VALIDAR O HISTORICO
         // --------------------------------------
 
         /*
@@ -305,7 +279,7 @@ class KycControllerTest {
         );
 
         // --------------------------------------
-        // 11. VALIDAR O RETORNO FINAL
+        // 10. VALIDAR O RETORNO FINAL
         // --------------------------------------
 
         verify(service).buscarPorId("KYC001");

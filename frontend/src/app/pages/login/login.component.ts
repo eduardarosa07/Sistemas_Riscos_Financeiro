@@ -33,7 +33,10 @@ export class LoginComponent {
       next: (u) => this.router.navigate([u.perfil==='ADMINISTRADOR'?'/usuarios':'/home']),
       error: (err) => {
         this.carregando = false;
-        this.erro = err?.error?.message || 'Não foi possível autenticar. Verifique o backend e as credenciais.';
+        this.erro =
+          err?.error?.erro ||
+          err?.error?.message ||
+          'Não foi possível autenticar. Verifique o backend e as credenciais.';
       }
     });
   }

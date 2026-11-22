@@ -1,53 +1,68 @@
-# Sistema de Riscos Financeiros - Backend
+# Backend SGR
 
-Backend Spring Boot organizado sob o pacote raiz `sr`, usando PostgreSQL como unico banco de dados da aplicacao.
-O pgAdmin pode ser usado para criar, consultar e administrar o banco PostgreSQL.
+API REST Spring Boot do Sistema de Gerenciamento de Riscos Financeiros.
+
+## Responsabilidade
+
+O backend consulta clientes, contas, transacoes, KYC, PLD, fraude, chargeback,
+regras e classificacoes de risco fornecidos pela origem externa. O SGR nao
+calcula nem cria scores ou niveis de risco.
+
+As escritas proprias do sistema ficam restritas a usuarios, auditoria,
+tratativas e historicos.
 
 ## Requisitos
 
-- Java 21 (versão do pom.xml)
-- PostgreSQL
-- pgAdmin (opcional, recomendado para administracao visual)
-- Maven Wrapper incluido no projeto
+- Java 21;
+- PostgreSQL com o banco `sistema_riscos` preparado;
+- Maven Wrapper incluido.
 
-## Banco local
+## Variaveis de ambiente
 
-1. No pgAdmin, conecte-se ao seu servidor PostgreSQL.
-2. Crie o banco `sistema_riscos` (o script `database/01-criar-banco.sql` pode ser usado como referencia).
-3. Ajuste usuario e senha do PostgreSQL por variaveis de ambiente ou em uma configuracao local que nao seja versionada.
+| Variavel | Uso | Padrao |
+| --- | --- | --- |
+| `DB_URL` | URL JDBC | `jdbc:postgresql://localhost:5432/sistema_riscos` |
+| `DB_USERNAME` | Usuario PostgreSQL | `postgres` |
+| `DB_PASSWORD` | Senha PostgreSQL | vazio |
+| `JPA_DDL_AUTO` | Validacao do schema | `validate` |
+| `JPA_SHOW_SQL` | Exibir SQL | `false` |
+| `SERVER_PORT` | Porta da API | `8080` |
+| `FRONTEND_ORIGIN` | Origem CORS | `http://localhost:4200` |
+| `SGR_SINCRONIZACAO_AUTOMATICA` | Sincronizacao agendada | `false` |
 
-Valores padrao de desenvolvimento:
+Credenciais nao devem ser gravadas no repositorio.
 
-- URL: `jdbc:postgresql://localhost:5432/sistema_riscos`
-- usuario: `postgres`
-- senha: `postgres`
-
-Variaveis suportadas: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JPA_DDL_AUTO`, `JPA_SHOW_SQL` e `SERVER_PORT`.
-
-> Para desenvolvimento, `JPA_DDL_AUTO=update` permite ao Hibernate criar/ajustar as tabelas mapeadas. Para ambientes controlados, prefira migracoes versionadas e `validate`.
-
-## Executar
-
-Windows PowerShell:
+## Executar no PowerShell
 
 ```powershell
-cd backend
-$env:DB_PASSWORD="SUA_SENHA_DO_POSTGRES"
+$env:SGR_SINCRONIZACAO_AUTOMATICA = 'false'
 .\mvnw.cmd spring-boot:run
 ```
 
-A API inicia, por padrao, em `http://localhost:8080`.
+Defina `DB_PASSWORD` de forma segura no ambiente antes de iniciar. O script
+`scripts/iniciar_apresentacao.ps1` da raiz solicita a senha de forma oculta.
 
-## Estrutura
+A API fica disponivel em `http://localhost:8080`. O status publico pode ser
+consultado em `http://localhost:8080/api/status`.
 
-- `sr.config`: configuracoes compartilhadas
-- `sr.controller`: endpoints REST
-- `sr.dto`: contratos de entrada/saida da API
-- `sr.exception`: excecoes e tratamento global
-- `sr.model`: entidades JPA
-- `sr.repository`: acesso a dados com Spring Data JPA
-- `sr.service`: regras de negocio e orquestracao
+A interface e executada separadamente pelo Angular na porta 4200.
 
-## Bancos removidos nesta revisao
+## Garantias de inicializacao
 
-Esta versao nao utiliza H2 nem Databricks. A persistencia foi consolidada exclusivamente em PostgreSQL.
+- Hibernate usa `validate` e nao cria nem altera tabelas.
+- Scripts SQL nao sao executados automaticamente.
+- Bootstrap administrativo permanece desabilitado quando as variaveis
+  `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD` estao vazias.
+- Sincronizacao automatica permanece desabilitada por padrao.
+
+## Testes seguros
+
+Os testes unitarios e MockMvc usam mocks. Os testes que iniciam o contexto
+Spring ou acessam PostgreSQL sao opt-in por variavel de ambiente.
+
+```powershell
+.\mvnw.cmd test
+```
+
+Para a apresentacao, use preferencialmente o script da raiz:
+`scripts/iniciar_apresentacao.ps1`.

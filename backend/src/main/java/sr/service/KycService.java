@@ -27,18 +27,4 @@ public class KycService {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Kyc não encontrado: " + id));
     }
 
-    public Kyc salvar(Kyc objeto) {
-        return repository.save(objeto);
-    }
-
-    public Kyc atualizar(String id, Kyc objeto) {
-        buscarPorId(id);
-        objeto.setIdKyc(id);
-        return repository.save(objeto);
-    }
-
-    public void excluir(String id) {
-        Kyc existente = buscarPorId(id);
-        repository.delete(existente);
-    }
 }
